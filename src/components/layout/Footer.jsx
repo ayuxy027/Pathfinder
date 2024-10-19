@@ -13,7 +13,7 @@ const socialIcons = [
 
 const footerLinks = [
   {
-    title: 'CareerSync',
+    title: 'PathFinder',
     links: [
       { label: 'About Us', href: '#' },
       { label: 'Our Approach', href: '#' },
@@ -130,7 +130,7 @@ export default function Footer() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <p className="text-lg">&copy; 2024 CareerSync. All rights reserved.</p>
+          <p className="text-lg">&copy; 2024 PathFinder. All rights reserved.</p>
         </motion.div>
       </div>
     </footer>

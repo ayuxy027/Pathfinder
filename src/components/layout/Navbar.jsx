@@ -4,9 +4,9 @@ import { Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 const navItems = [
-  { name: 'Home', link: '/' },
+  { name: 'Home', link: '/'},
   { name: 'Events', link: '/events' },
-  { name: 'services', link: '/services' },
+  { name: 'Services', link: '/services' },
   { name: 'My Progress', link: '/contact' },
 ];
 
@@ -60,7 +60,7 @@ export default function Navbar() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                 CareerSync
+                 PathFinder
                 </motion.h1>
               </motion.a>
             </div>
@@ -89,7 +89,7 @@ export default function Navbar() {
                 whileTap={{ scale: 0.9 }}
               >
                 <span className="sr-only">Open main menu</span>
-                {isOpen ? <X className="text-white w-6 h-6" /> : <Menu className="text-white w-6 h-6" />}
+                {isOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
               </motion.button>
             </div>
           </div>
