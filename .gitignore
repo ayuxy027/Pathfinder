@@ -1,24 +1,78 @@
+# Node.js dependencies
+node_modules/
+jspm_packages/
+
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# OS generated files
 .DS_Store
+.DS_Store          # macOS
+Thumbs.db          # Windows
+ehthumbs.db        # Windows
+Desktop.ini        # Windows
+
+# IDEs and text editors
+.vscode/
+.idea/
+*.code-workspace
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.iml
+
+# Build and distribution directories
+build/
+dist/
+.out/
+.vite/
+.vitest/
+.svelte-kit/
+.next/
+
+# Temporary files
+tmp/
+temp/
+
+# Generated files
+coverage/
+*.cache
+*.eslintcache
+*.history
+tsconfig.tsbuildinfo
+
+# Static output
+out/
+
+# Environment variables
+.env
+
+# Package manager lock files
+yarn.lock
+.pnp.*
+.yarn-integrity
+pnpm-lock.yaml
+
+# Testing artifacts
+*.lcov
+jest-test-results.json
+
+# Parcel, Storybook, and other frameworks
+.cache/
+.parcel-cache/
+.storybook/
+node_modules/@storybook/
+
+# Miscellaneous
+bower_components/
+.sass-cache/
+.prettierignore
+.serverless/
+.terraform/
+.resources/_gen/
