@@ -38,7 +38,7 @@ export default function Navbar() {
       {/* Actual Navbar */}
       <motion.nav
         className={`fixed top-0 left-0 right-0 z-50 font-body transition-colors duration-300 ease-in-out 
-          ${isScrolled ? 'bg-proj/90 backdrop-blur-sm shadow-md' : 'bg-proj'}
+          ${isScrolled ? 'bg-teal-800/90 backdrop-blur-sm shadow-md' : 'bg-proj'}
         `}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -84,12 +84,12 @@ export default function Navbar() {
               <motion.button
                 onClick={toggleMenu}
                 type="button"
-                className="inline-flex items-center justify-center p-2 ml-4 text-white rounded-md sm:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500"
+                className="inline-flex items-center justify-center p-2 ml-4 rounded-md sm:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
                 <span className="sr-only">Open main menu</span>
-                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {isOpen ? <X className="text-white w-6 h-6" /> : <Menu className="text-white w-6 h-6" />}
               </motion.button>
             </div>
           </div>
@@ -98,7 +98,7 @@ export default function Navbar() {
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              className="sm:hidden bg-proj/95 backdrop-blur-sm"
+              className="sm:hidden bg-teal-800/95 backdrop-blur-sm"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
@@ -149,7 +149,7 @@ function MobileNavItem({ to, text, isActive }) {
       <Link to={to} className="block">
         <motion.div 
           className={`px-3 py-2 text-base font-medium transition-all duration-300 ease-in-out ${
-            isActive ? 'text-yellow-600 bg-blue-200' : 'text-blue-800 hover:bg-blue-200'
+            isActive ? 'text-yellow-600 bg-blue-200' : 'text-white hover:bg-blue-200'
           }`}
           whileHover={{ x: 5 }}
           transition={{ duration: 0.2 }}
