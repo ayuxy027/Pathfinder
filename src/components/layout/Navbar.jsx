@@ -6,7 +6,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 const navItems = [
   { name: 'Home', link: '/', icon: <User size={18} /> },
-  { name: 'Events', link: '/events', icon: <Calendar size={18} /> },
+  { name: 'Build Your Resume', link: '/events', icon: <Calendar size={18} /> },
   { name: 'Services', link: '/services', icon: <Briefcase size={18} /> },
   { name: 'My Progress', link: '/progress', icon: <TrendingUp size={18} /> },
 ];

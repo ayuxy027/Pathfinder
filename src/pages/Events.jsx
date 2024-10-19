@@ -1,216 +1,352 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Calendar, Clock, MapPin, Music, Microscope, Palette, Cpu, Ticket, ChevronRight, Camera, Book, Globe, Film, Beaker } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Upload, User, BookOpen, Award, Briefcase, X, Download, Camera, Paperclip } from 'lucide-react';
 
-const events = [
-  {
-    title: "Indus Valley Civilization: Ancient Wonders",
-    date: "June 15 - July 31, 2024",
-    time: "10:00 AM - 5:00 PM",
-    location: "National Museum, Delhi",
-    description: "Explore Indus Valley artifacts and interactive displays.",
-    icon: Palette
-  },
-  {
-    title: "Mughal Art: A Legacy of Innovation",
-    date: "July 1 - August 31, 2024",
-    time: "9:00 AM - 5:00 PM",
-    location: "Chhatrapati Shivaji Museum, Mumbai",
-    description: "Curated exhibition of Mughal art and architecture.",
-    icon: Palette
-  },
-  {
-    title: "Dinosaur Discovery: India’s Prehistoric Past",
-    date: "August 5 - August 15, 2024",
-    time: "11:00 AM - 3:00 PM",
-    location: "Birla Science Museum, Hyderabad",
-    description: "Hands-on activities showcasing India’s prehistoric life.",
-    icon: Microscope
-  },
-  {
-    title: "Modern Marvels: India's Tech Journey",
-    date: "September 10 - October 31, 2024",
-    time: "10:00 AM - 6:00 PM",
-    location: "Visvesvaraya Museum, Bangalore",
-    description: "Evolution of technology from ancient to modern times.",
-    icon: Cpu
-  },
-  {
-    title: "Swar Sangam: Indian Classical Music",
-    date: "Every Saturday in October 2024",
-    time: "7:00 PM - 9:00 PM",
-    location: "India Habitat Centre, Delhi",
-    description: "Live classical music performances from maestros.",
-    icon: Music
-  },
-  {
-    title: "Photography in Indian History",
-    date: "November 1 - December 15, 2024",
-    time: "9:00 AM - 5:00 PM",
-    location: "Kolkata Museum of Modern Art",
-    description: "Photography journey from early days to digital era.",
-    icon: Camera
-  },
-  {
-    title: "Indian Literary Legends",
-    date: "December 1 - January 15, 2025",
-    time: "10:00 AM - 7:00 PM",
-    location: "Jaipur Literature Museum",
-    description: "Rare manuscripts and exhibits of India’s literary icons.",
-    icon: Book
-  },
-  {
-    title: "India’s Cultural Diversity",
-    date: "January 15 - February 28, 2025",
-    time: "9:00 AM - 6:00 PM",
-    location: "National Museum, Delhi",
-    description: "Explore India’s cultural heritage and artifacts.",
-    icon: Globe
-  },
-  {
-    title: "Bollywood: 100 Years of Indian Cinema",
-    date: "February 1 - March 15, 2025",
-    time: "11:00 AM - 8:00 PM",
-    location: "Film City, Mumbai",
-    description: "Film screenings, memorabilia, and interactive exhibits.",
-    icon: Film
-  }
+const tabs = [
+  { id: 'about', label: 'About', icon: User },
+  { id: 'education', label: 'Education', icon: BookOpen },
+  { id: 'skills', label: 'Skills', icon: Award },
+  { id: 'experience', label: 'Experience', icon: Briefcase },
 ];
 
-export default function Events() {
+const professionCategories = [
+  'Technology', 'Healthcare', 'Education', 'Finance', 'Arts & Entertainment',
+  'Legal', 'Marketing', 'Engineering', 'Hospitality', 'Other'
+];
+
+export default function UniversalResumeBuilder() {
+  const [activeTab, setActiveTab] = useState('about');
+  const [formData, setFormData] = useState({
+    about: { name: '', email: '', phone: '', location: '', summary: '', profession: '' },
+    education: { degree: '', institution: '', year: '', achievements: '' },
+    skills: { professional: '', personal: '', languages: '' },
+    experience: { title: '', company: '', period: '', responsibilities: '', media: null }
+  });
+  const [showPreview, setShowPreview] = useState(false);
+
+  const handleInputChange = (section, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [section]: { ...prev[section], [field]: value }
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && (file.type === 'application/pdf' || file.type.startsWith('image/'))) {
+      setFormData(prev => ({
+        ...prev,
+        experience: { ...prev.experience, media: file }
+      }));
+    } else {
+      alert('Please upload a PDF or image file');
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setShowPreview(true);
+  };
+
+  const handleDownload = () => {
+    const resumeContent = JSON.stringify(formData, null, 2);
+    const blob = new Blob([resumeContent], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'resume.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <section className="relative py-8 mt-0 overflow-hidden bg-white">
-      <BackgroundAnimation />
-      <div className="relative z-10 px-4 mx-auto max-w-7xl">
-        <motion.h2 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="mb-12 text-5xl font-semibold text-center text-transparent bg-proj bg-clip-text"
-        >
-          Discover Events
-        </motion.h2>
+    <div className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
+        <div className="flex flex-col md:flex-row">
+          {/* Sidebar */}
+          <div className="w-full md:w-1/4 bg-teal-50 p-6">
+            {tabs.map((tab) => (
+              <TabButton
+                key={tab.id}
+                id={tab.id}
+                label={tab.label}
+                icon={tab.icon}
+                isActive={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+              />
+            ))}
+            <motion.button
+              onClick={handleDownload}
+              className="flex items-center w-full p-3 mt-4 bg-teal-500 text-white rounded-lg transition-colors hover:bg-teal-600"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Download className="mr-2" size={20} />
+              Download Resume
+            </motion.button>
+          </div>
 
-        <motion.div 
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: { 
-              opacity: 1,
-              transition: { 
-                staggerChildren: 0.1,
-                delayChildren: 0.3
-              }
-            }
-          }}
-          className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3"
-        >
-          {events.map((event, index) => (
-            <EventCard key={index} event={event} />
-          ))}
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="mt-16 text-center"
-        >
-          <Link 
-            to="/explore"
-            className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white transition-all duration-300 rounded-full shadow-lg bg-proj hover:bg-blue-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:shadow-xl"
-          >
-            Explore More Events
-            <ChevronRight className="ml-2" size={20} />
-          </Link>
-        </motion.div>
+          {/* Main Content */}
+          <div className="w-full md:w-3/4 p-8">
+            <h2 className="text-3xl font-bold text-teal-700 mb-6">
+              {tabs.find((tab) => tab.id === activeTab)?.label}
+            </h2>
+            <form onSubmit={handleSubmit}>
+              {activeTab === 'about' && (
+                <AboutSection
+                  data={formData.about}
+                  onChange={(field, value) => handleInputChange('about', field, value)}
+                />
+              )}
+              {activeTab === 'education' && (
+                <EducationSection
+                  data={formData.education}
+                  onChange={(field, value) => handleInputChange('education', field, value)}
+                />
+              )}
+              {activeTab === 'skills' && (
+                <SkillsSection
+                  data={formData.skills}
+                  onChange={(field, value) => handleInputChange('skills', field, value)}
+                />
+              )}
+              {activeTab === 'experience' && (
+                <ExperienceSection
+                  data={formData.experience}
+                  onChange={(field, value) => handleInputChange('experience', field, value)}
+                  onFileChange={handleFileChange}
+                />
+              )}
+              <motion.button
+                type="submit"
+                className="mt-6 px-6 py-3 bg-teal-500 text-white rounded-lg shadow-md hover:bg-teal-600 transition-colors duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Preview Resume
+              </motion.button>
+            </form>
+          </div>
+        </div>
       </div>
-    </section>
+
+      <AnimatePresence>
+        {showPreview && (
+          <ResumePreview formData={formData} onClose={() => setShowPreview(false)} />
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
-function EventCard({ event }) {
+function TabButton({ id, label, icon: Icon, isActive, onClick }) {
   return (
-    <motion.div 
-      variants={{
-        hidden: { y: 20, opacity: 0 },
-        visible: { 
-          y: 0, 
-          opacity: 1,
-          transition: { 
-            type: "spring",
-            stiffness: 100,
-            damping: 12
-          }
-        }
-      }}
+    <motion.button
+      className={`flex items-center w-full p-3 mb-2 rounded-lg transition-colors ${
+        isActive ? 'bg-teal-500 text-white' : 'text-teal-700 hover:bg-teal-100'
+      }`}
+      onClick={onClick}
       whileHover={{ scale: 1.05 }}
-      className="flex flex-col h-full overflow-hidden transition-all duration-300 bg-white border rounded-lg shadow-md border-opacity-20 hover:shadow-lg border-proj"
+      whileTap={{ scale: 0.95 }}
     >
-      <div className="flex-grow p-6">
-        <div className="flex items-center justify-between mb-4">
-          <motion.div
-            className="p-3 bg-blue-100 rounded-full"
-            whileHover={{ rotate: 360 }}
-            transition={{ duration: 0.5 }}
-          >
-            <event.icon size={32} className="text-blue-500" />
-          </motion.div>
-          <Link 
-            to="/book"
-            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white transition-colors duration-300 rounded-full bg-proj hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            <Ticket className="mr-2" size={16} />
-            Book Now
-          </Link>
+      <Icon className="mr-2" size={20} />
+      {label}
+    </motion.button>
+  );
+}
+
+function InputField({ label, type = 'text', value, onChange, ...props }) {
+  return (
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-teal-700 mb-1">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full p-2 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+        {...props}
+      />
+    </div>
+  );
+}
+
+function TextArea({ label, value, onChange, ...props }) {
+  return (
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-teal-700 mb-1">{label}</label>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full p-2 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+        rows="4"
+        {...props}
+      />
+    </div>
+  );
+}
+
+function AboutSection({ data, onChange }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <InputField label="Full Name" value={data.name} onChange={(value) => onChange('name', value)} placeholder="John Doe" />
+      <InputField label="Email" type="email" value={data.email} onChange={(value) => onChange('email', value)} placeholder="john@example.com" />
+      <InputField label="Phone" type="tel" value={data.phone} onChange={(value) => onChange('phone', value)} placeholder="+1 (555) 123-4567" />
+      <InputField label="Location" value={data.location} onChange={(value) => onChange('location', value)} placeholder="New York, NY" />
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-teal-700 mb-1">Profession Category</label>
+        <select
+          value={data.profession}
+          onChange={(e) => onChange('profession', e.target.value)}
+          className="w-full p-2 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+        >
+          <option value="">Select a category</option>
+          {professionCategories.map((category) => (
+            <option key={category} value={category}>{category}</option>
+          ))}
+        </select>
+      </div>
+      <TextArea label="Professional Summary" value={data.summary} onChange={(value) => onChange('summary', value)} placeholder="Write a brief summary of your professional background and career objectives..." />
+    </motion.div>
+  );
+}
+
+function EducationSection({ data, onChange }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <InputField label="Degree/Certification" value={data.degree} onChange={(value) => onChange('degree', value)} placeholder="Bachelor of Arts in Communication" />
+      <InputField label="Institution" value={data.institution} onChange={(value) => onChange('institution', value)} placeholder="University of Example" />
+      <InputField label="Completion Year" type="number" value={data.year} onChange={(value) => onChange('year', value)} placeholder="2023" />
+      <TextArea label="Achievements/Honors" value={data.achievements} onChange={(value) => onChange('achievements', value)} placeholder="List any academic achievements, honors, or relevant coursework..." />
+    </motion.div>
+  );
+}
+
+function SkillsSection({ data, onChange }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <TextArea label="Professional Skills" value={data.professional} onChange={(value) => onChange('professional', value)} placeholder="List your professional skills relevant to your field..." />
+      <TextArea label="Personal Skills" value={data.personal} onChange={(value) => onChange('personal', value)} placeholder="List your personal skills (e.g., communication, teamwork, problem-solving)..." />
+      <TextArea label="Languages" value={data.languages} onChange={(value) => onChange('languages', value)} placeholder="List languages you speak and your proficiency level..." />
+    </motion.div>
+  );
+}
+
+function ExperienceSection({ data, onChange, onFileChange }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <InputField label="Job Title" value={data.title} onChange={(value) => onChange('title', value)} placeholder="Marketing Manager" />
+      <InputField label="Company/Organization" value={data.company} onChange={(value) => onChange('company', value)} placeholder="Global Innovations Inc." />
+      <InputField label="Employment Period" value={data.period} onChange={(value) => onChange('period', value)} placeholder="Jan 2020 - Present" />
+      <TextArea label="Key Responsibilities" value={data.responsibilities} onChange={(value) => onChange('responsibilities', value)} placeholder="Describe your key responsibilities and achievements in this role..." />
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold text-teal-700 mb-2">Upload Additional Documents or Images</h3>
+        <div className="flex items-center justify-center w-full">
+          <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-teal-300 border-dashed rounded-lg cursor-pointer bg-teal-50 hover:bg-teal-100">
+            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+              <Upload className="w-10 h-10 mb-3 text-teal-500" />
+              <p className="mb-2 text-sm text-teal-700"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+              <p className="text-xs text-teal-500">PDF or Image (MAX. 10MB)</p>
+            </div>
+            <input id="dropzone-file" type="file" className="hidden" accept=".pdf,image/*" onChange={onFileChange} />
+          </label>
         </div>
-        <h3 className="mb-2 text-xl font-bold text-transparent bg-proj bg-clip-text">{event.title}</h3>
-        <div className="mb-4 space-y-2">
-          <p className="flex items-center text-sm text-gray-600">
-            <Calendar className="mr-2 text-blue-500" size={16} />
-            {event.date}
+        {data.media && (
+          <p className="mt-2 text-sm text-teal-600">
+            <Paperclip className="inline-block mr-1" size={16} />
+            {data.media.name}
           </p>
-          <p className="flex items-center text-sm text-gray-600">
-            <Clock className="mr-2 text-blue-500" size={16} />
-            {event.time}
-          </p>
-          <p className="flex items-center text-sm text-gray-600">
-            <MapPin className="mr-2 text-blue-500" size={16} />
-            {event.location}
-          </p>
-        </div>
-        <p className="text-sm text-gray-700">{event.description}</p>
+        )}
       </div>
     </motion.div>
   );
 }
 
-function BackgroundAnimation() {
+function ResumePreview({ formData, onClose }) {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(50)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute bg-blue-500 rounded-full opacity-10"
-          style={{
-            width: Math.random() * 4 + 1,
-            height: Math.random() * 4 + 1,
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0.1, 0.3, 0.1],
-          }}
-          transition={{
-            duration: Math.random() * 5 + 5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+    >
+      <motion.div
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 50, opacity: 0 }}
+        className="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold text-teal-700">Resume Preview</h2>
+          <button onClick={onClose} className="text-teal-500 hover:text-teal-700">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          <section>
+            <h3 className="text-xl font-semibold text-teal-600 mb-2">About</h3>
+            <p><strong>Name:</strong> {formData.about.name}</p>
+            <p><strong>Email:</strong> {formData.about.email}</p>
+            <p><strong>Phone:</strong> {formData.about.phone}</p>
+            <p><strong>Location:</strong> {formData.about.location}</p>
+            <p><strong>Profession:</strong> {formData.about.profession}</p>
+            <p><strong>Summary:</strong> {formData.about.summary}</p>
+          </section>
+
+          <section>
+            <h3 className="text-xl font-semibold text-teal-600 mb-2">Education</h3>
+            <p><strong>Degree/Certification:</strong>   {formData.education.degree}</p>
+            <p><strong>Institution:</strong> {formData.education.institution}</p>
+            <p><strong>Year:</strong> {formData.education.year}</p>
+            <p><strong>Achievements:</strong> {formData.education.achievements}</p>
+          </section>
+
+          <section>
+            <h3 className="text-xl font-semibold text-teal-600 mb-2">Skills</h3>
+            <p><strong>Professional Skills:</strong> {formData.skills.professional}</p>
+            <p><strong>Personal Skills:</strong> {formData.skills.personal}</p>
+            <p><strong>Languages:</strong> {formData.skills.languages}</p>
+          </section>
+
+          <section>
+            <h3 className="text-xl font-semibold text-teal-600 mb-2">Experience</h3>
+            <p><strong>Job Title:</strong> {formData.experience.title}</p>
+            <p><strong>Company/Organization:</strong> {formData.experience.company}</p>
+            <p><strong>Period:</strong> {formData.experience.period}</p>
+            <p><strong>Responsibilities:</strong> {formData.experience.responsibilities}</p>
+            {formData.experience.media && (
+              <div>
+                <p><strong>Uploaded File:</strong> {formData.experience.media.name}</p>
+                {formData.experience.media.type.startsWith('image/') && (
+                  <img 
+                    src={URL.createObjectURL(formData.experience.media)} 
+                    alt="Uploaded content" 
+                    className="mt-2 max-w-full h-auto rounded-lg shadow-md"
+                  />
+                )}
+              </div>
+            )}
+          </section>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
