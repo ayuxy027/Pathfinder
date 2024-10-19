@@ -1,7 +1,7 @@
 import axios from 'axios';
 import getAIPrompt from './aiPrompt';
 
-const API_KEY = 'AIzaSyCPOQB5cv8R1ucsx6Y7xhdTJNbzqVdqNfI';
+const API_KEY = import.meta.env.VITE_API_KEY;
 const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 
 export const getAIResponse = async (userInput) => {
