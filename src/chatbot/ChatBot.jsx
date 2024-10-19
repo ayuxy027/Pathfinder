@@ -139,7 +139,7 @@ const ChatBot = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(true)}
-          className="p-4 text-white transition-all rounded-full shadow-lg bg-gradient-to-r from-indigo-500 to-indigo-600 hover:shadow-xl"
+          className="p-4 text-white transition-all rounded-full shadow-lg bg-proj hover:shadow-xl"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
