@@ -1,6 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import company1 from '../../../images/company1.svg';
+import company2 from '../../../images/company2.svg';
+import company3 from '../../../images/company3.svg';
+import company4 from '../../../images/company4.svg';
+import company5 from '../../../images/company5.svg';
+import company6 from '../../../images/company6.svg';
+import company7 from '../../../images/company7.png';
+import company8 from '../../../images/company8.png';
+import company9 from '../../../images/company9.png';
+import company10 from '../../../images/company10.svg';
 
 const StatsSection = () => {
   const [ref, inView] = useInView({
@@ -8,120 +18,74 @@ const StatsSection = () => {
     threshold: 0.1,
   });
 
-  const stats = [
-    { label: "Total Users", value: 20000, suffix: "+", color: "from-blue-400 to-indigo-600" },
-    { label: "Career Paths Available", value: 100, suffix: "", color: "from-purple-400 to-pink-600" },
-    { label: "Successful Placements", value: 1200, suffix: "", color: "from-green-500 to-teal-700" },
-    { label: "User Satisfaction Rate", value: 95, suffix: "%", color: "from-yellow-400 to-orange-500" },
+  const companyLogos = [
+    { name: 'Company 1', src: company1 },
+    { name: 'Company 2', src: company2 },
+    { name: 'Company 3', src: company3 },
+    { name: 'Company 4', src: company4 },
+    { name: 'Company 5', src: company5 },
+    { name: 'Company 6', src: company6 },
+    { name: 'Company 7', src: company7 },
+    { name: 'Company 8', src: company8 },
+    { name: 'Company 9', src: company9 },
+    { name: 'Company 10', src: company10 },
   ];
 
   return (
-    <section ref={ref} className="relative py-12 overflow-hidden sm:py-16 md:py-20 lg:py-24 bg-gradient-to-br from-blue-50 to-indigo-100">
-      <ParticleBackground />
-      <div className="container relative z-10 px-4 mx-auto">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+    <section ref={ref} className="py-20 bg-gray-50"> {/* Increased vertical padding */}
+      <div className="container px-6 mx-auto space-y-16"> {/* Added spacing between sections */}
+        
+        {/* Heading with additional bottom margin */}
+        <motion.h2
+          initial={{ opacity: 0, y: -20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="grid grid-cols-2 gap-4 sm:gap-6 md:gap-8 lg:grid-cols-4"
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-3xl font-bold leading-snug text-center text-gray-800 mb-14 md:text-4xl"
         >
-          {stats.map((stat, index) => (
-            <StatItem key={index} stat={stat} inView={inView} delay={index * 0.2} />
+          Folks who use <span className="text-transparent text-semibold bg-proj bg-clip-text">PathFinder</span> get hired at
+        </motion.h2>
+
+        {/* Grid of Logos with increased spacing */}
+        <motion.div
+          initial="hidden"
+          animate={inView ? "visible" : "hidden"}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.1,
+              },
+            },
+          }}
+          className="grid items-center grid-cols-2 gap-10 md:grid-cols-5 md:gap-12" // Increased gaps between grid items
+        >
+          {companyLogos.map((logo, index) => (
+            <motion.div
+              key={logo.name}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: {
+                    duration: 0.6,
+                    ease: "easeOut",
+                  },
+                },
+              }}
+              className="flex items-center justify-center p-4" // Added padding inside each grid item
+            >
+              <img
+                src={logo.src}
+                alt={`${logo.name} logo`}
+                className="max-w-[100px] md:max-w-[120px] h-auto opacity-70 transition-opacity duration-300 hover:opacity-100"
+              />
+            </motion.div>
           ))}
         </motion.div>
       </div>
     </section>
-  );
-};
-
-const StatItem = ({ stat, inView, delay }) => {
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.8, delay, ease: "easeOut" }}
-      className="relative group"
-    >
-      <motion.div
-        className={`absolute inset-0 bg-gradient-to-r ${stat.color} rounded-lg sm:rounded-xl lg:rounded-2xl opacity-75 blur-lg group-hover:opacity-100 transition-opacity duration-300`}
-        animate={{ scale: [1, 1.05, 1] }}
-        transition={{ duration: 4, repeat: Infinity, repeatType: "reverse" }}
-      />
-      <motion.div 
-        className="relative flex flex-col items-center justify-center h-full p-3 transition-all duration-300 bg-white rounded-lg shadow-md sm:p-4 md:p-5 lg:p-6 sm:shadow-lg lg:shadow-xl bg-opacity-80 backdrop-blur-sm sm:rounded-xl lg:rounded-2xl group-hover:shadow-lg sm:group-hover:shadow-xl lg:group-hover:shadow-2xl"
-        whileHover={{ scale: 1.03 }}
-      >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={inView ? { scale: 1 } : {}}
-          transition={{ duration: 0.8, delay: delay + 0.2, ease: "easeOut" }}
-          className="text-center"
-        >
-          <motion.h2 
-            className={`mb-1 sm:mb-2 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r ${stat.color}`}
-            animate={{ opacity: [1, 0.8, 1] }}
-            transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
-          >
-            <CountUp end={stat.value} suffix={stat.suffix} duration={2} />
-          </motion.h2>
-          <p className="text-xs font-medium text-gray-700 sm:text-sm md:text-base lg:text-lg">{stat.label}</p>
-        </motion.div>
-      </motion.div>
-    </motion.div>
-  );
-};
-
-const CountUp = ({ end, suffix, duration }) => {
-  const [count, setCount] = React.useState(0);
-
-  React.useEffect(() => {
-    let startTimestamp;
-    const step = (timestamp) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progress = Math.min((timestamp - startTimestamp) / (duration * 1000), 1);
-      setCount(Math.floor(progress * end));
-      if (progress < 1) {
-        window.requestAnimationFrame(step);
-      }
-    };
-    window.requestAnimationFrame(step);
-  }, [end, duration]);
-
-  return (
-    <span>{count.toLocaleString()}{suffix}</span>
-  );
-};
-
-const ParticleBackground = () => {
-  const particleCount = React.useMemo(() => {
-    if (typeof window === 'undefined') return 15;
-    return window.innerWidth < 640 ? 10 : window.innerWidth < 1024 ? 20 : 30;
-  }, []);
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(particleCount)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute bg-white rounded-full opacity-20"
-          style={{
-            width: Math.random() * 3 + 1,
-            height: Math.random() * 3 + 1,
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [0, -20, 0],
-            opacity: [0.2, 0.5, 0.2],
-          }}
-          transition={{
-            duration: Math.random() * 3 + 3,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
   );
 };
 

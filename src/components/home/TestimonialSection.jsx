@@ -1,8 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FaQuoteLeft, FaStar } from 'react-icons/fa';
+import { useInView } from 'react-intersection-observer';
 
 const TestimonialSection = () => {
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
+
   const testimonials = [
     {
       name: "Ravi Kumar",
@@ -56,15 +62,15 @@ const TestimonialSection = () => {
   ];
 
   return (
-    <section className="py-20 overflow-hidden bg-proj">
-      <div className="container px-4 mx-auto">
+    <section ref={ref} className="py-20 overflow-hidden bg-proj">
+      <div className="container px-6 mx-auto space-y-16">
         <motion.h2
           initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="mb-12 text-3xl font-bold text-center text-white md:text-4xl"
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-3xl font-bold leading-snug text-center text-white mb-14 md:text-4xl"
         >
-          What Our Users Say
+          What Our <span className="text-transparent bg-white text-semibold bg-clip-text">Users</span> Say
         </motion.h2>
         <div className="flex flex-col gap-12">
           <TestimonialRow testimonials={testimonials.slice(0, 4)} direction="left" />
@@ -100,12 +106,12 @@ const TestimonialCard = ({ testimonial }) => {
     >
       <div className="absolute top-0 left-0 w-20 h-20 -translate-x-10 -translate-y-10 bg-blue-200 rounded-full opacity-20"></div>
       <div className="absolute bottom-0 right-0 w-20 h-20 translate-x-10 translate-y-10 bg-blue-200 rounded-full opacity-20"></div>
-      <FaQuoteLeft className="mb-4 text-3xl text-blue-400" />
+      <FaQuoteLeft className="mb-4 text-3xl text-teal-600" />
       <p className="mb-4 text-sm italic text-gray-700">{testimonial.content}</p>
       <div className="flex items-center gap-4">
         <img src={testimonial.image} alt={testimonial.name} className="object-cover w-12 h-12 rounded-full" />
         <div>
-          <h3 className="font-semibold text-blue-600">{testimonial.name}</h3>
+          <h3 className="font-semibold text-teal-600">{testimonial.name}</h3>
           <p className="text-xs text-gray-600">{testimonial.role}</p>
         </div>
       </div>

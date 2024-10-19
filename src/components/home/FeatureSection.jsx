@@ -1,8 +1,14 @@
 import React from 'react';
-import { FaChalkboardTeacher, FaBriefcase, FaUserGraduate, FaChartLine } from 'react-icons/fa'; // Importing new icons
+import { FaChalkboardTeacher, FaBriefcase, FaUserGraduate, FaChartLine } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 
 const FeatureSection = () => {
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
+
   const features = [
     {
       icon: FaUserGraduate,
@@ -27,15 +33,15 @@ const FeatureSection = () => {
   ];
 
   return (
-    <section className="py-16 sm:py-20 bg-gradient-to-b from-white to-blue-50">
-      <div className="container px-4 mx-auto">
-        <motion.h2 
+    <section ref={ref} className="py-20 bg-gradient-to-b from-white to-blue-50">
+      <div className="container px-6 mx-auto space-y-16">
+        <motion.h2
           initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="mb-10 text-3xl font-bold text-center text-transparent sm:mb-16 sm:text-4xl md:text-5xl bg-clip-text bg-proj"
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-3xl font-bold leading-snug text-center text-gray-800 mb-14 md:text-4xl"
         >
-          How AI-Enhanced Career Guidance Works
+          How <span className="text-transparent text-semibold bg-proj bg-clip-text">PathFinder</span> works
         </motion.h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 sm:gap-8">
           {features.map((feature, index) => (

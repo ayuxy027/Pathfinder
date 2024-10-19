@@ -1,22 +1,21 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, useAnimation } from 'framer-motion';
-import { FaUserGraduate } from 'react-icons/fa'; // Changed icon to represent education
+import { FaUserGraduate } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const GlowingButton = () => {
   const buttonRef = useRef(null);
   const glowAnimation = useAnimation();
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
   useEffect(() => {
     const animateGlow = async () => {
       await glowAnimation.start({
         boxShadow: [
-          '0 0 10px #fbbf24, 0 0 20px #fbbf24, 0 0 30px #fbbf24', // Light yellow for glow
-          '0 0 15px #f59e0b, 0 0 30px #f59e0b, 0 0 45px #f59e0b',
-          '0 0 10px #b45309, 0 0 20px #b45309, 0 0 30px #b45309',
+          '0 0 5px #fbbf24, 0 0 10px #fbbf24',
+          '0 0 8px #f59e0b, 0 0 15px #f59e0b',
+          '0 0 5px #b45309, 0 0 10px #b45309',
         ],
-        scale: [1, 1.05, 1],
         transition: { duration: 3, ease: 'easeInOut', repeat: Infinity },
       });
     };
@@ -24,18 +23,18 @@ const GlowingButton = () => {
   }, [glowAnimation]);
 
   const handleClick = () => {
-    navigate('/consult'); // Navigate to the consultation route
+    navigate('/consult');
   };
 
   return (
     <motion.button
       ref={buttonRef}
       animate={glowAnimation}
-      whileHover={{ scale: 1.1 }}
+      whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      onClick={handleClick} // Handle button click
+      onClick={handleClick}
       className="px-8 py-3 text-lg font-semibold text-black transition-all duration-300 bg-yellow-500 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400"
-      style={{ backgroundColor: '#fbbf24' }} // Solid gold background color
+      style={{ backgroundColor: '#fbbf24' }}
     >
       <FaUserGraduate className="inline-block mr-2 text-black" />
       Get Career Guidance
@@ -51,9 +50,9 @@ export default function EnhancedCTASection() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-4 text-3xl font-bold text-transparent md:text-4xl bg-clip-text bg-proj"
+          className="mb-4 text-3xl font-bold md:text-4xl"
         >
-          Ready to Shape Your Future?
+          Discover Your Future with <span className="text-transparent text-semibold bg-proj bg-clip-text">PathFinder</span> Today
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -61,7 +60,7 @@ export default function EnhancedCTASection() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="mb-8 text-xl text-gray-600"
         >
-          Sign up now for personalized career guidance and unlock your potential!
+          Unlock your potential through personalized career guidance and expert support!
         </motion.p>
         <GlowingButton />
       </div>
