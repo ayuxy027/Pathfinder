@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User, LogOut, LogIn, Settings, HelpCircle, Bell } from 'lucide-react';
+import { Menu, X, User, LogOut, LogIn, Settings, HelpCircle, Bell, Calendar, Briefcase, TrendingUp } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth0 } from "@auth0/auth0-react";
 
 const navItems = [
-  { name: 'Home', link: '/'},
-  { name: 'Events', link: '/events' },
-  { name: 'Services', link: '/services' },
-  { name: 'My Progress', link: '/progress' },
+  { name: 'Home', link: '/', icon: <User size={18} /> },
+  { name: 'Events', link: '/events', icon: <Calendar size={18} /> },
+  { name: 'Services', link: '/services', icon: <Briefcase size={18} /> },
+  { name: 'My Progress', link: '/progress', icon: <TrendingUp size={18} /> },
 ];
+
+// Dummy data for user stats
+const userStats = {
+  completedCourses: 12,
+  ongoingCourses: 3,
+  achievements: 8,
+  nextMilestone: 'Advanced Level'
+};
 
 export default function EnhancedNavbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,7 +46,10 @@ export default function EnhancedNavbar() {
   };
 
   const handleLogin = () => loginWithRedirect();
-  const handleLogout = () => logout({ returnTo: window.location.origin });
+  const handleLogout = () => {
+    logout({ returnTo: window.location.origin });
+    setShowUserCard(false);
+  };
 
   return (
     <>
@@ -72,7 +83,7 @@ export default function EnhancedNavbar() {
       </motion.nav>
       <AnimatePresence>
         {showUserCard && (
-          <UserCard user={user} onClose={toggleUserCard} onLogout={handleLogout} />
+          <UserCard user={user} userStats={userStats} onClose={toggleUserCard} onLogout={handleLogout} />
         )}
       </AnimatePresence>
     </>
@@ -109,6 +120,7 @@ function DesktopNav({ location }) {
           key={item.name} 
           to={item.link} 
           text={item.name} 
+          icon={item.icon}
           index={index}
           isActive={location.pathname === item.link}
         />
@@ -117,10 +129,10 @@ function DesktopNav({ location }) {
   );
 }
 
-function NavItem({ to, text, index, isActive }) {
+function NavItem({ to, text, icon, index, isActive }) {
   return (
     <motion.div
-      className={`px-3 py-2 text-base font-medium rounded-md ${
+      className={`px-3 py-2 text-sm font-medium rounded-md ${
         isActive ? 'text-yellow-400' : 'text-white hover:text-yellow-300'
       }`}
       whileHover={{ scale: 1.05 }}
@@ -129,7 +141,10 @@ function NavItem({ to, text, index, isActive }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 * index }}
     >
-      <Link to={to}>{text}</Link>
+      <Link to={to} className="flex items-center space-x-2">
+        {icon}
+        <span>{text}</span>
+      </Link>
     </motion.div>
   );
 }
@@ -166,6 +181,7 @@ function MobileMenu({ isOpen, location }) {
                 key={item.name} 
                 to={item.link} 
                 text={item.name}
+                icon={item.icon}
                 isActive={location.pathname === item.link}
               />
             ))}
@@ -176,7 +192,7 @@ function MobileMenu({ isOpen, location }) {
   );
 }
 
-function MobileNavItem({ to, text, isActive }) {
+function MobileNavItem({ to, text, icon, isActive }) {
   return (
     <motion.div
       className="block overflow-hidden rounded-md"
@@ -185,13 +201,16 @@ function MobileNavItem({ to, text, isActive }) {
     >
       <Link to={to} className="block">
         <motion.div 
-          className={`px-3 py-2 text-base font-medium transition-all duration-300 ease-in-out ${
+          className={`px-3 py-2 text-sm font-medium transition-all duration-300 ease-in-out ${
             isActive ? 'text-yellow-600 bg-blue-200' : 'text-white hover:bg-blue-200'
           }`}
           whileHover={{ x: 5 }}
           transition={{ duration: 0.2 }}
         >
-          {text}
+          <div className="flex items-center space-x-2">
+            {icon}
+            <span>{text}</span>
+          </div>
         </motion.div>
       </Link>
     </motion.div>
@@ -233,7 +252,7 @@ function AuthButton({ isLoading, isAuthenticated, user, onLogin, onLogout, toggl
             whileHover={{ borderColor: "#ffffff" }}
           />
           <motion.span 
-            className="hidden text-sm font-medium text-white sm:inline-block"
+            className="hidden text-base font-medium text-white sm:inline-block"
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
@@ -258,25 +277,40 @@ function AuthButton({ isLoading, isAuthenticated, user, onLogin, onLogout, toggl
   );
 }
 
-function UserCard({ user, onClose, onLogout }) {
+function UserCard({ user, userStats, onClose, onLogout }) {
   return (
     <motion.div
-      className="fixed z-50 w-64 overflow-hidden bg-white rounded-lg shadow-xl top-20 right-4"
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
+      className="fixed z-50 overflow-hidden bg-white rounded-lg shadow-xl top-20 right-4 w-80"
+      initial={{ opacity: 0, y: -20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -20, scale: 0.95 }}
       transition={{ duration: 0.2 }}
     >
-      <div className="p-4 text-white bg-teal-700">
-        <div className="flex items-center space-x-3">
-          <img src={user.picture} alt={user.name} className="w-12 h-12 border-2 border-white rounded-full" />
+      <div className="p-6 text-white bg-teal-700">
+        <div className="flex items-center space-x-4">
+          <img src={user.picture} alt={user.name} className="w-16 h-16 border-2 border-white rounded-full" />
           <div>
-            <h3 className="font-semibold">{user.name}</h3>
+            <h3 className="text-xl font-semibold">{user.name}</h3>
             <p className="text-sm opacity-75">{user.email}</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4 mt-4 text-center">
+          <div>
+            <p className="text-2xl font-bold">{userStats.completedCourses}</p>
+            <p className="text-xs opacity-75">Completed Courses</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold">{userStats.ongoingCourses}</p>
+            <p className="text-xs opacity-75">Ongoing Courses</p>
           </div>
         </div>
       </div>
       <div className="p-4">
+        <p className="mb-2 text-sm text-gray-600">Your Progress</p>
+        <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
+          <div className="bg-teal-600 h-2.5 rounded-full" style={{ width: '45%' }}></div>
+        </div>
+        <p className="mb-4 text-sm text-gray-600">Next milestone: {userStats.nextMilestone}</p>
         <UserCardButton icon={<User size={18} />} text="Profile" />
         <UserCardButton icon={<Settings size={18} />} text="Settings" />
         <UserCardButton icon={<Bell size={18} />} text="Notifications" />
@@ -290,13 +324,13 @@ function UserCard({ user, onClose, onLogout }) {
 function UserCardButton({ icon, text, onClick }) {
   return (
     <motion.button
-      className="flex items-center w-full px-2 py-2 text-left text-gray-700 rounded-md hover:bg-gray-100"
+      className="flex items-center w-full px-3 py-2 text-left text-gray-700 rounded-md hover:bg-gray-100"
       onClick={onClick}
       whileHover={{ x: 5 }}
       whileTap={{ scale: 0.95 }}
     >
       {icon}
-      <span className="ml-2">{text}</span>
+      <span className="ml-2 text-sm">{text}</span>
     </motion.button>
   );
 }
