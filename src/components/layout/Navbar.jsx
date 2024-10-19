@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User, LogOut, LogIn, Settings, HelpCircle, Bell } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth0 } from "@auth0/auth0-react";
 
 const navItems = [
   { name: 'Home', link: '/'},
   { name: 'Events', link: '/events' },
   { name: 'Services', link: '/services' },
-  { name: 'My Progress', link: '/contact' },
+  { name: 'My Progress', link: '/progress' },
 ];
 
-export default function Navbar() {
+export default function EnhancedNavbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showUserCard, setShowUserCard] = useState(false);
   const location = useLocation();
+  const { loginWithRedirect, logout, user, isLoading, isAuthenticated } = useAuth0();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,15 +33,19 @@ export default function Navbar() {
     setIsOpen(!isOpen);
   };
 
+  const toggleUserCard = () => {
+    setShowUserCard(!showUserCard);
+  };
+
+  const handleLogin = () => loginWithRedirect();
+  const handleLogout = () => logout({ returnTo: window.location.origin });
+
   return (
     <>
-      {/* Placeholder div to occupy space */}
       <div className="h-20"></div>
-      
-      {/* Actual Navbar */}
       <motion.nav
         className={`fixed top-0 left-0 right-0 z-50 font-body transition-colors duration-300 ease-in-out 
-          ${isScrolled ? 'bg-teal-800/90 backdrop-blur-sm shadow-md' : 'bg-proj'}
+          ${isScrolled ? 'bg-teal-800/90 backdrop-blur-sm shadow-md' : 'bg-teal-700'}
         `}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -46,79 +53,67 @@ export default function Navbar() {
       >
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
-            {/* Logo */}
-            <div className="flex items-center">
-              <motion.a
-                href="/"
-                className="flex-shrink-0"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <motion.h1 
-                  className="text-xl font-bold text-white sm:text-2xl lg:text-3xl"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                >
-                 PathFinder
-                </motion.h1>
-              </motion.a>
-            </div>
-
-            {/* Desktop Navigation Items */}
-            <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-8">
-              {navItems.map((item, index) => (
-                <NavItem 
-                  key={item.name} 
-                  to={item.link} 
-                  text={item.name} 
-                  index={index}
-                  isActive={location.pathname === item.link}
-                />
-              ))}
-            </div>
-
-            {/* Get Started button and Mobile Menu Toggle */}
+            <Logo />
+            <DesktopNav location={location} />
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <NavButton href="/get-started" text="Get Started" variant="primary" />
-              <motion.button
-                onClick={toggleMenu}
-                type="button"
-                className="inline-flex items-center justify-center p-2 ml-4 rounded-md sm:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <span className="sr-only">Open main menu</span>
-                {isOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
-              </motion.button>
+              <AuthButton
+                isLoading={isLoading}
+                isAuthenticated={isAuthenticated}
+                user={user}
+                onLogin={handleLogin}
+                onLogout={handleLogout}
+                toggleUserCard={toggleUserCard}
+              />
+              <MobileMenuToggle isOpen={isOpen} toggleMenu={toggleMenu} />
             </div>
           </div>
         </div>
-        {/* Mobile menu */}
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              className="sm:hidden bg-teal-800/95 backdrop-blur-sm"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-            >
-              <div className="px-2 pt-2 pb-3 space-y-1">
-                {navItems.map((item) => (
-                  <MobileNavItem 
-                    key={item.name} 
-                    to={item.link} 
-                    text={item.name}
-                    isActive={location.pathname === item.link}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <MobileMenu isOpen={isOpen} location={location} />
       </motion.nav>
+      <AnimatePresence>
+        {showUserCard && (
+          <UserCard user={user} onClose={toggleUserCard} onLogout={handleLogout} />
+        )}
+      </AnimatePresence>
     </>
+  );
+}
+
+function Logo() {
+  return (
+    <div className="flex items-center">
+      <motion.a
+        href="/"
+        className="flex-shrink-0"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <motion.h1 
+          className="text-xl font-bold text-white sm:text-2xl lg:text-3xl"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          PathFinder
+        </motion.h1>
+      </motion.a>
+    </div>
+  );
+}
+
+function DesktopNav({ location }) {
+  return (
+    <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-8">
+      {navItems.map((item, index) => (
+        <NavItem 
+          key={item.name} 
+          to={item.link} 
+          text={item.name} 
+          index={index}
+          isActive={location.pathname === item.link}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -136,6 +131,48 @@ function NavItem({ to, text, index, isActive }) {
     >
       <Link to={to}>{text}</Link>
     </motion.div>
+  );
+}
+
+function MobileMenuToggle({ isOpen, toggleMenu }) {
+  return (
+    <motion.button
+      onClick={toggleMenu}
+      type="button"
+      className="inline-flex items-center justify-center p-2 ml-4 rounded-md sm:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500"
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+    >
+      <span className="sr-only">Open main menu</span>
+      {isOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
+    </motion.button>
+  );
+}
+
+function MobileMenu({ isOpen, location }) {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="sm:hidden bg-teal-800/95 backdrop-blur-sm"
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+        >
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            {navItems.map((item) => (
+              <MobileNavItem 
+                key={item.name} 
+                to={item.link} 
+                text={item.name}
+                isActive={location.pathname === item.link}
+              />
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -161,25 +198,105 @@ function MobileNavItem({ to, text, isActive }) {
   );
 }
 
-function NavButton({ href, text, variant = "secondary" }) {
-  const baseClasses = "px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500";
-  const variantClasses = variant === "primary"
-    ? "bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-blue-900"
-    : "bg-white/10 hover:bg-white/20 text-white";
+function AuthButton({ isLoading, isAuthenticated, user, onLogin, onLogout, toggleUserCard }) {
+  if (isLoading) {
+    return (
+      <motion.div
+        className="flex items-center px-4 py-2 space-x-2 text-sm font-medium text-white rounded-md bg-white/10"
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ repeat: Infinity, duration: 1.5 }}
+      >
+        <div className="w-4 h-4 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
+        <span>Loading...</span>
+      </motion.div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return (
+      <motion.div
+        className="relative"
+        initial={false}
+        animate={{ scale: [0.9, 1], opacity: [0, 1] }}
+        transition={{ duration: 0.2 }}
+      >
+        <motion.button
+          onClick={toggleUserCard}
+          className="flex items-center space-x-2 focus:outline-none"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <motion.img
+            src={user.picture}
+            alt={user.name}
+            className="w-8 h-8 border-2 border-yellow-400 rounded-full"
+            whileHover={{ borderColor: "#ffffff" }}
+          />
+          <motion.span 
+            className="hidden text-sm font-medium text-white sm:inline-block"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            {user.name}
+          </motion.span>
+        </motion.button>
+      </motion.div>
+    );
+  }
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.05 }}
+    <motion.button
+      onClick={onLogin}
+      className="flex items-center px-4 py-2 space-x-2 text-sm font-medium text-blue-900 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+      whileHover={{ scale: 1.05, boxShadow: '0 0 15px rgba(255, 255, 255, 0.3)' }}
       whileTap={{ scale: 0.95 }}
     >
-      <Link to={href}>
-        <motion.button
-          className={`${baseClasses} ${variantClasses}`}
-          whileHover={{ boxShadow: '0 0 15px rgba(255, 255, 255, 0.3)' }}
-        >
-          {text}
-        </motion.button>
-      </Link>
+      <LogIn className="w-4 h-4" />
+      <span>Get Started</span>
+    </motion.button>
+  );
+}
+
+function UserCard({ user, onClose, onLogout }) {
+  return (
+    <motion.div
+      className="fixed z-50 w-64 overflow-hidden bg-white rounded-lg shadow-xl top-20 right-4"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div className="p-4 text-white bg-teal-700">
+        <div className="flex items-center space-x-3">
+          <img src={user.picture} alt={user.name} className="w-12 h-12 border-2 border-white rounded-full" />
+          <div>
+            <h3 className="font-semibold">{user.name}</h3>
+            <p className="text-sm opacity-75">{user.email}</p>
+          </div>
+        </div>
+      </div>
+      <div className="p-4">
+        <UserCardButton icon={<User size={18} />} text="Profile" />
+        <UserCardButton icon={<Settings size={18} />} text="Settings" />
+        <UserCardButton icon={<Bell size={18} />} text="Notifications" />
+        <UserCardButton icon={<HelpCircle size={18} />} text="Help" />
+        <UserCardButton icon={<LogOut size={18} />} text="Logout" onClick={onLogout} />
+      </div>
     </motion.div>
+  );
+}
+
+function UserCardButton({ icon, text, onClick }) {
+  return (
+    <motion.button
+      className="flex items-center w-full px-2 py-2 text-left text-gray-700 rounded-md hover:bg-gray-100"
+      onClick={onClick}
+      whileHover={{ x: 5 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      {icon}
+      <span className="ml-2">{text}</span>
+    </motion.button>
   );
 }
