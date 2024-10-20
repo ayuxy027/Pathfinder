@@ -9,12 +9,12 @@ import ErrorFallback from './components/shared/ErrorFallback';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Lazy load pages
-const Home = lazy(() => import('./pages/Home'));
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const Progress = lazy(() => import('./pages/Progress'));
-const Quiz = lazy(() => import('./pages/Quiz'));
-const Resume = lazy(() => import('./pages/Resume'));
-const Roadmap = lazy(() => import('./pages/Roadmap'));
+const Home = lazy(() => import('./pages/Home.jsx'));
+const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
+const Progress = lazy(() => import('./pages/Progress.jsx'));
+const Quiz = lazy(() => import('./pages/Quiz.jsx'));
+const Resume = lazy(() => import('./pages/Resume.jsx'));
+const Roadmap = lazy(() => import('./pages/Roadmap.jsx'));
 
 function App() {
   const { isLoading } = useAuth0();
