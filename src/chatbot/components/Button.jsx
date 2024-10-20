@@ -4,8 +4,8 @@ import { motion } from 'framer-motion'
 const Button = React.forwardRef(({ className = '', variant = 'default', size = 'default', children, ...props }, ref) => {
   const baseStyle = "inline-flex items-center justify-center text-sm font-medium transition-all focus:outline-none disabled:opacity-50 disabled:pointer-events-none rounded-full"
   const variants = {
-    default: "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
-    ghost: "text-indigo-600 hover:bg-indigo-100 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
+    default: "bg-teal-600 text-white hover:bg-teal-700 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2",
+    ghost: "text-teal-600 hover:bg-teal-100 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2",
   }
   const sizes = {
     default: "h-10 px-4 py-2",
@@ -26,5 +26,7 @@ const Button = React.forwardRef(({ className = '', variant = 'default', size = '
     </motion.button>
   )
 })
+
+Button.displayName = 'Button'
 
 export default Button

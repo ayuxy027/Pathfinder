@@ -1,11 +1,11 @@
-import React from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import TypewriterEffect from './TypewriterEffect'
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import TypewriterEffect from './TypewriterEffect';
 
 const ChatMessages = ({ messages, isLoading, handleCompletionCelebration }) => {
   return (
     <motion.div 
-      className="flex-1 p-4 space-y-4 overflow-y-auto md:p-6 bg-gradient-to-b from-indigo-50 to-white"
+      className="flex-1 p-4 space-y-4 overflow-y-auto md:p-6 bg-gradient-to-b from-white to-teal-50"
     >
       <AnimatePresence>
         {messages.map((message, index) => (
@@ -20,8 +20,8 @@ const ChatMessages = ({ messages, isLoading, handleCompletionCelebration }) => {
             <motion.div
               className={`max-w-[85%] p-3 md:p-4 rounded-2xl shadow-md ${
                 message.sender === 'user'
-                  ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white'
-                  : 'bg-white text-gray-800 border border-gray-100'
+                  ? 'bg-gradient-to-br from-teal-500 to-teal-600 text-white'
+                  : 'bg-white text-gray-800 border border-gray-200'
               }`}
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -36,7 +36,7 @@ const ChatMessages = ({ messages, isLoading, handleCompletionCelebration }) => {
         ))}
       </AnimatePresence>
     </motion.div>
-  )
-}
+  );
+};
 
-export default ChatMessages
+export default ChatMessages;

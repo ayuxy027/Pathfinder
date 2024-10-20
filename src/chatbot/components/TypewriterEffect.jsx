@@ -10,7 +10,7 @@ const TypewriterEffect = ({ content, onComplete }) => {
       const timer = setTimeout(() => {
         setDisplayedContent(prevContent => prevContent + content[currentIndex])
         setCurrentIndex(prevIndex => prevIndex + 1)
-      }, 60) // Adjust typing speed here
+      }, 25) // Adjust typing speed here
       return () => clearTimeout(timer)
     } else {
       onComplete()

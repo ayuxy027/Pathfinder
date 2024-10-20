@@ -70,7 +70,7 @@ const ChatBot = () => {
             }}
           >
             <motion.div
-              className="flex items-center justify-between p-4 text-white cursor-move md:p-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-t-3xl"
+              className="flex items-center justify-between p-4 text-white cursor-move md:p-6 bg-gradient-to-r from-teal-500 to-teal-600 rounded-t-3xl"
               whileHover={{ backgroundImage: 'linear-gradient(to right, #6366F1, #7C3AED)' }}
               transition={{ duration: 0.3 }}
             >
