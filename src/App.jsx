@@ -10,11 +10,11 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Lazy load pages
 const Home = lazy(() => import('./pages/Home'));
-const Events = lazy(() => import('./pages/Events'));
-const FAQ = lazy(() => import('./pages/FAQ'));
-const Contact = lazy(() => import('./pages/Contact'));
-// const QrCodePage = lazy(() => import('./pages/QrCodePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
+const Progress = lazy(() => import('./pages/Progress'));
+const Quiz = lazy(() => import('./pages/Quiz'));
+const Resume = lazy(() => import('./pages/Resume'));
+const Roadmap = lazy(() => import('./pages/Roadmap'));
 
 function App() {
   const { isLoading } = useAuth0();
@@ -32,31 +32,27 @@ function App() {
             <Suspense fallback={<EnhancedLoadingSpinner />}>
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
-                {/* Home route is now open to all users */}
                 <Route path="/" element={<Home />} />
-                <Route path="/events" element={
+                <Route path="/progress" element={
                   <ProtectedRoute>
-                    <Events />
+                    <Progress />
                   </ProtectedRoute>
                 } />
-                <Route path="/faq" element={
+                <Route path="/quiz" element={
                   <ProtectedRoute>
-                    <FAQ />
+                    <Quiz />
                   </ProtectedRoute>
                 } />
-                <Route path="/contact" element={
+                <Route path="/resume" element={
                   <ProtectedRoute>
-                    <Contact />
+                    <Resume />
                   </ProtectedRoute>
                 } />
-                {/* <Route path="/qr-code" element={
+                <Route path="/roadmap" element={
                   <ProtectedRoute>
-                    <QrCodePage />
+                    <Roadmap />
                   </ProtectedRoute>
-                } /> */}
-
-                {/* Redirect all /book routes to / */}
-                <Route path="/book/*" element={<Navigate to="/" replace />} />
+                } />
 
                 {/* Catch-all route for 404 */}
                 <Route path="*" element={<Navigate to="/" replace />} />

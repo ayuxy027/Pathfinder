@@ -62,11 +62,11 @@ export default function UniversalResumeBuilder() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
+    <div className="min-h-screen p-8 bg-gray-100">
+      <div className="max-w-6xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl">
         <div className="flex flex-col md:flex-row">
           {/* Sidebar */}
-          <div className="w-full md:w-1/4 bg-teal-50 p-6">
+          <div className="w-full p-6 md:w-1/4 bg-teal-50">
             {tabs.map((tab) => (
               <TabButton
                 key={tab.id}
@@ -79,7 +79,7 @@ export default function UniversalResumeBuilder() {
             ))}
             <motion.button
               onClick={handleDownload}
-              className="flex items-center w-full p-3 mt-4 bg-teal-500 text-white rounded-lg transition-colors hover:bg-teal-600"
+              className="flex items-center w-full p-3 mt-4 text-white transition-colors bg-teal-500 rounded-lg hover:bg-teal-600"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -89,8 +89,8 @@ export default function UniversalResumeBuilder() {
           </div>
 
           {/* Main Content */}
-          <div className="w-full md:w-3/4 p-8">
-            <h2 className="text-3xl font-bold text-teal-700 mb-6">
+          <div className="w-full p-8 md:w-3/4">
+            <h2 className="mb-6 text-3xl font-bold text-teal-700">
               {tabs.find((tab) => tab.id === activeTab)?.label}
             </h2>
             <form onSubmit={handleSubmit}>
@@ -121,7 +121,7 @@ export default function UniversalResumeBuilder() {
               )}
               <motion.button
                 type="submit"
-                className="mt-6 px-6 py-3 bg-teal-500 text-white rounded-lg shadow-md hover:bg-teal-600 transition-colors duration-300"
+                className="px-6 py-3 mt-6 text-white transition-colors duration-300 bg-teal-500 rounded-lg shadow-md hover:bg-teal-600"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -160,7 +160,7 @@ function TabButton({ id, label, icon: Icon, isActive, onClick }) {
 function InputField({ label, type = 'text', value, onChange, ...props }) {
   return (
     <div className="mb-4">
-      <label className="block text-sm font-medium text-teal-700 mb-1">{label}</label>
+      <label className="block mb-1 text-sm font-medium text-teal-700">{label}</label>
       <input
         type={type}
         value={value}
@@ -175,7 +175,7 @@ function InputField({ label, type = 'text', value, onChange, ...props }) {
 function TextArea({ label, value, onChange, ...props }) {
   return (
     <div className="mb-4">
-      <label className="block text-sm font-medium text-teal-700 mb-1">{label}</label>
+      <label className="block mb-1 text-sm font-medium text-teal-700">{label}</label>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -199,7 +199,7 @@ function AboutSection({ data, onChange }) {
       <InputField label="Phone" type="tel" value={data.phone} onChange={(value) => onChange('phone', value)} placeholder="+1 (555) 123-4567" />
       <InputField label="Location" value={data.location} onChange={(value) => onChange('location', value)} placeholder="New York, NY" />
       <div className="mb-4">
-        <label className="block text-sm font-medium text-teal-700 mb-1">Profession Category</label>
+        <label className="block mb-1 text-sm font-medium text-teal-700">Profession Category</label>
         <select
           value={data.profession}
           onChange={(e) => onChange('profession', e.target.value)}
@@ -257,7 +257,7 @@ function ExperienceSection({ data, onChange, onFileChange }) {
       <InputField label="Employment Period" value={data.period} onChange={(value) => onChange('period', value)} placeholder="Jan 2020 - Present" />
       <TextArea label="Key Responsibilities" value={data.responsibilities} onChange={(value) => onChange('responsibilities', value)} placeholder="Describe your key responsibilities and achievements in this role..." />
       <div className="mt-6">
-        <h3 className="text-lg font-semibold text-teal-700 mb-2">Upload Additional Documents or Images</h3>
+        <h3 className="mb-2 text-lg font-semibold text-teal-700">Upload Additional Documents or Images</h3>
         <div className="flex items-center justify-center w-full">
           <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-teal-300 border-dashed rounded-lg cursor-pointer bg-teal-50 hover:bg-teal-100">
             <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -285,7 +285,7 @@ function ResumePreview({ formData, onClose }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+      className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50"
     >
       <motion.div
         initial={{ y: 50, opacity: 0 }}
@@ -293,7 +293,7 @@ function ResumePreview({ formData, onClose }) {
         exit={{ y: 50, opacity: 0 }}
         className="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
       >
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-teal-700">Resume Preview</h2>
           <button onClick={onClose} className="text-teal-500 hover:text-teal-700">
             <X size={24} />
@@ -302,7 +302,7 @@ function ResumePreview({ formData, onClose }) {
 
         <div className="space-y-6">
           <section>
-            <h3 className="text-xl font-semibold text-teal-600 mb-2">About</h3>
+            <h3 className="mb-2 text-xl font-semibold text-teal-600">About</h3>
             <p><strong>Name:</strong> {formData.about.name}</p>
             <p><strong>Email:</strong> {formData.about.email}</p>
             <p><strong>Phone:</strong> {formData.about.phone}</p>
@@ -312,7 +312,7 @@ function ResumePreview({ formData, onClose }) {
           </section>
 
           <section>
-            <h3 className="text-xl font-semibold text-teal-600 mb-2">Education</h3>
+            <h3 className="mb-2 text-xl font-semibold text-teal-600">Education</h3>
             <p><strong>Degree/Certification:</strong>   {formData.education.degree}</p>
             <p><strong>Institution:</strong> {formData.education.institution}</p>
             <p><strong>Year:</strong> {formData.education.year}</p>
@@ -320,14 +320,14 @@ function ResumePreview({ formData, onClose }) {
           </section>
 
           <section>
-            <h3 className="text-xl font-semibold text-teal-600 mb-2">Skills</h3>
+            <h3 className="mb-2 text-xl font-semibold text-teal-600">Skills</h3>
             <p><strong>Professional Skills:</strong> {formData.skills.professional}</p>
             <p><strong>Personal Skills:</strong> {formData.skills.personal}</p>
             <p><strong>Languages:</strong> {formData.skills.languages}</p>
           </section>
 
           <section>
-            <h3 className="text-xl font-semibold text-teal-600 mb-2">Experience</h3>
+            <h3 className="mb-2 text-xl font-semibold text-teal-600">Experience</h3>
             <p><strong>Job Title:</strong> {formData.experience.title}</p>
             <p><strong>Company/Organization:</strong> {formData.experience.company}</p>
             <p><strong>Period:</strong> {formData.experience.period}</p>
@@ -339,7 +339,7 @@ function ResumePreview({ formData, onClose }) {
                   <img 
                     src={URL.createObjectURL(formData.experience.media)} 
                     alt="Uploaded content" 
-                    className="mt-2 max-w-full h-auto rounded-lg shadow-md"
+                    className="h-auto max-w-full mt-2 rounded-lg shadow-md"
                   />
                 )}
               </div>

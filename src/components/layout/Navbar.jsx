@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User, LogOut, LogIn, Settings, HelpCircle, Bell, Calendar, Briefcase, TrendingUp } from 'lucide-react';
+import { Menu, X, User, LogOut, LogIn, Settings, HelpCircle, Bell, Calendar, Briefcase, TrendingUp, Link as LinkIcon, Map, FileQuestion, ChevronDown } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth0 } from "@auth0/auth0-react";
 
 const navItems = [
   { name: 'Home', link: '/', icon: <User size={18} /> },
-  { name: 'Build Your Resume', link: '/events', icon: <Calendar size={18} /> },
-  { name: 'Services', link: '/services', icon: <Briefcase size={18} /> },
+  { name: 'Build Your Resume', link: '/resume', icon: <Calendar size={18} /> },
+  { name: 'Roadmap Generation', link: '/roadmap', icon: <Map size={18} /> },
   { name: 'My Progress', link: '/progress', icon: <TrendingUp size={18} /> },
+];
+
+const serviceItems = [
+  { name: 'Take A Quiz', link: '/quiz', icon: <FileQuestion size={18} /> },
+];
+
+const externalResources = [
+  { name: 'Udemy Course', link: 'https://www.udemy.com/course/100-days-of-code/?couponCode=LEARNNOWPLANS', icon: '↗️' },
+  { name: 'Coursera Course', link: 'https://www.coursera.org/learn/algorithms-part1', icon: '↗️' }
 ];
 
 // Dummy data for user stats
@@ -19,10 +28,11 @@ const userStats = {
   nextMilestone: 'Advanced Level'
 };
 
-export default function EnhancedNavbar() {
+export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showUserCard, setShowUserCard] = useState(false);
+  const [showServicesDropdown, setShowServicesDropdown] = useState(false);
   const location = useLocation();
   const { loginWithRedirect, logout, user, isLoading, isAuthenticated } = useAuth0();
 
@@ -45,6 +55,10 @@ export default function EnhancedNavbar() {
     setShowUserCard(!showUserCard);
   };
 
+  const toggleServicesDropdown = () => {
+    setShowServicesDropdown(!showServicesDropdown);
+  };
+
   const handleLogin = () => loginWithRedirect();
   const handleLogout = () => {
     logout({ returnTo: window.location.origin });
@@ -63,9 +77,9 @@ export default function EnhancedNavbar() {
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20">
+          <div className="flex items-center justify-between h-20">
             <Logo />
-            <DesktopNav location={location} />
+            <DesktopNav location={location} showServicesDropdown={showServicesDropdown} toggleServicesDropdown={toggleServicesDropdown} />
             <div className="flex items-center space-x-2 sm:space-x-4">
               <AuthButton
                 isLoading={isLoading}
@@ -112,7 +126,7 @@ function Logo() {
   );
 }
 
-function DesktopNav({ location }) {
+function DesktopNav({ location, showServicesDropdown, toggleServicesDropdown }) {
   return (
     <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-8">
       {navItems.map((item, index) => (
@@ -125,6 +139,11 @@ function DesktopNav({ location }) {
           isActive={location.pathname === item.link}
         />
       ))}
+      <ServicesDropdown 
+        showServicesDropdown={showServicesDropdown} 
+        toggleServicesDropdown={toggleServicesDropdown}
+        location={location}
+      />
     </div>
   );
 }
@@ -146,6 +165,60 @@ function NavItem({ to, text, icon, index, isActive }) {
         <span>{text}</span>
       </Link>
     </motion.div>
+  );
+}
+
+function ServicesDropdown({ showServicesDropdown, toggleServicesDropdown, location }) {
+  return (
+    <div className="relative group">
+      <motion.button
+        className="flex items-center px-3 py-2 text-sm font-medium text-white rounded-md hover:text-yellow-300"
+        onClick={toggleServicesDropdown}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <Briefcase size={18} />
+        <span className="ml-2">Services</span>
+        <ChevronDown size={14} className="ml-1" />
+      </motion.button>
+      <AnimatePresence>
+        {showServicesDropdown && (
+          <motion.div
+            className="absolute right-0 w-64 mt-2 bg-white rounded-md shadow-lg"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            {serviceItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.link}
+                className={`flex items-center px-4 py-2 text-sm ${
+                  location.pathname === item.link ? 'text-teal-600 bg-gray-100' : 'text-gray-700 hover:bg-gray-100 hover:text-teal-600'
+                }`}
+              >
+                {item.icon}
+                <span className="ml-2">{item.name}</span>
+              </Link>
+            ))}
+            <div className="px-4 py-2 text-sm font-medium text-gray-700">External Resources</div>
+            {externalResources.map((resource) => (
+              <a
+                key={resource.name}
+                href={resource.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-teal-600"
+              >
+                <span className="mr-2">{resource.icon}</span>
+                {resource.name}
+              </a>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -185,6 +258,30 @@ function MobileMenu({ isOpen, location }) {
                 isActive={location.pathname === item.link}
               />
             ))}
+            {serviceItems.map((item) => (
+              <MobileNavItem 
+                key={item.name} 
+                to={item.link} 
+                text={item.name}
+                icon={item.icon}
+                isActive={location.pathname === item.link}
+              />
+            ))}
+            <div className="pt-4 mt-4 border-t border-white/10">
+              <p className="px-3 text-sm font-medium text-white">External Resources</p>
+              {externalResources.map((resource) => (
+                <a
+                  key={resource.name}
+                  href={resource.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center px-3 py-2 text-sm text-white hover:bg-white/10"
+                >
+                  <span className="mr-2">{resource.icon}</span>
+                  {resource.name}
+                </a>
+              ))}
+            </div>
           </div>
         </motion.div>
       )}
@@ -260,6 +357,7 @@ function AuthButton({ isLoading, isAuthenticated, user, onLogin, onLogout, toggl
             {user.name}
           </motion.span>
         </motion.button>
+      
       </motion.div>
     );
   }
@@ -272,7 +370,7 @@ function AuthButton({ isLoading, isAuthenticated, user, onLogin, onLogout, toggl
       whileTap={{ scale: 0.95 }}
     >
       <LogIn className="w-4 h-4" />
-      <span>Get Started</span>
+      <span>Join Now</span>
     </motion.button>
   );
 }
