@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, User, BookOpen, Award, Briefcase, X, Download, Camera, Paperclip } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { User, BookOpen, Award, Briefcase, Download } from 'lucide-react';
+import jsPDF from 'jspdf';
 
 const tabs = [
   { id: 'about', label: 'About', icon: User },
@@ -14,33 +15,37 @@ const professionCategories = [
   'Legal', 'Marketing', 'Engineering', 'Hospitality', 'Other'
 ];
 
-export default function UniversalResumeBuilder() {
+export default function ResumeBuilder() {
   const [activeTab, setActiveTab] = useState('about');
   const [formData, setFormData] = useState({
     about: { name: '', email: '', phone: '', location: '', summary: '', profession: '' },
-    education: { degree: '', institution: '', year: '', achievements: '' },
-    skills: { professional: '', personal: '', languages: '' },
-    experience: { title: '', company: '', period: '', responsibilities: '', media: null }
+    education: [{ degree: '', institution: '', year: '' }],
+    skills: [],
+    experience: [{ title: '', company: '', period: '', responsibilities: '' }]
   });
   const [showPreview, setShowPreview] = useState(false);
 
-  const handleInputChange = (section, field, value) => {
+  const handleInputChange = (section, field, value, index = 0) => {
     setFormData(prev => ({
       ...prev,
-      [section]: { ...prev[section], [field]: value }
+      [section]: Array.isArray(prev[section])
+        ? prev[section].map((item, i) => i === index ? { ...item, [field]: value } : item)
+        : { ...prev[section], [field]: value }
     }));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file && (file.type === 'application/pdf' || file.type.startsWith('image/'))) {
-      setFormData(prev => ({
-        ...prev,
-        experience: { ...prev.experience, media: file }
-      }));
-    } else {
-      alert('Please upload a PDF or image file');
-    }
+  const addItem = (section) => {
+    setFormData(prev => ({
+      ...prev,
+      [section]: [...prev[section], section === 'skills' ? '' : {}]
+    }));
+  };
+
+  const removeItem = (section, index) => {
+    setFormData(prev => ({
+      ...prev,
+      [section]: prev[section].filter((_, i) => i !== index)
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -49,47 +54,35 @@ export default function UniversalResumeBuilder() {
   };
 
   const handleDownload = () => {
-    const resumeContent = JSON.stringify(formData, null, 2);
-    const blob = new Blob([resumeContent], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'resume.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const doc = new jsPDF();
+    doc.text(JSON.stringify(formData, null, 2), 10, 10);
+    doc.save('resume.pdf');
   };
 
   return (
     <div className="min-h-screen p-8 bg-gray-100">
-      <div className="max-w-6xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl">
-        <div className="flex flex-col md:flex-row">
-          {/* Sidebar */}
-          <div className="w-full p-6 md:w-1/4 bg-teal-50">
+      <div className="max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl">
+        <div className="flex">
+          <div className="w-1/4 p-6 bg-teal-50">
             {tabs.map((tab) => (
               <TabButton
                 key={tab.id}
-                id={tab.id}
-                label={tab.label}
-                icon={tab.icon}
+                {...tab}
                 isActive={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id)}
               />
             ))}
             <motion.button
               onClick={handleDownload}
-              className="flex items-center w-full p-3 mt-4 text-white transition-colors bg-teal-500 rounded-lg hover:bg-teal-600"
+              className="flex items-center w-full p-3 mt-4 text-white bg-teal-500 rounded-lg hover:bg-teal-600"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <Download className="mr-2" size={20} />
-              Download Resume
+              Download PDF
             </motion.button>
           </div>
-
-          {/* Main Content */}
-          <div className="w-full p-8 md:w-3/4">
+          <div className="w-3/4 p-8">
             <h2 className="mb-6 text-3xl font-bold text-teal-700">
               {tabs.find((tab) => tab.id === activeTab)?.label}
             </h2>
@@ -101,27 +94,50 @@ export default function UniversalResumeBuilder() {
                 />
               )}
               {activeTab === 'education' && (
-                <EducationSection
+                <DynamicSection
                   data={formData.education}
-                  onChange={(field, value) => handleInputChange('education', field, value)}
+                  onChange={(field, value, index) => handleInputChange('education', field, value, index)}
+                  onAdd={() => addItem('education')}
+                  onRemove={(index) => removeItem('education', index)}
+                  renderFields={(item, index) => (
+                    <>
+                      <InputField label="Degree" value={item.degree} onChange={(value) => handleInputChange('education', 'degree', value, index)} />
+                      <InputField label="Institution" value={item.institution} onChange={(value) => handleInputChange('education', 'institution', value, index)} />
+                      <InputField label="Year" type="number" value={item.year} onChange={(value) => handleInputChange('education', 'year', value, index)} />
+                    </>
+                  )}
                 />
               )}
               {activeTab === 'skills' && (
-                <SkillsSection
+                <DynamicSection
                   data={formData.skills}
-                  onChange={(field, value) => handleInputChange('skills', field, value)}
+                  onChange={(value, index) => handleInputChange('skills', index, value)}
+                  onAdd={() => addItem('skills')}
+                  onRemove={(index) => removeItem('skills', index)}
+                  renderFields={(item, index) => (
+                    <InputField label={`Skill ${index + 1}`} value={item} onChange={(value) => handleInputChange('skills', index, value)} />
+                  )}
                 />
               )}
               {activeTab === 'experience' && (
-                <ExperienceSection
+                <DynamicSection
                   data={formData.experience}
-                  onChange={(field, value) => handleInputChange('experience', field, value)}
-                  onFileChange={handleFileChange}
+                  onChange={(field, value, index) => handleInputChange('experience', field, value, index)}
+                  onAdd={() => addItem('experience')}
+                  onRemove={(index) => removeItem('experience', index)}
+                  renderFields={(item, index) => (
+                    <>
+                      <InputField label="Job Title" value={item.title} onChange={(value) => handleInputChange('experience', 'title', value, index)} />
+                      <InputField label="Company" value={item.company} onChange={(value) => handleInputChange('experience', 'company', value, index)} />
+                      <InputField label="Period" value={item.period} onChange={(value) => handleInputChange('experience', 'period', value, index)} />
+                      <TextArea label="Responsibilities" value={item.responsibilities} onChange={(value) => handleInputChange('experience', 'responsibilities', value, index)} />
+                    </>
+                  )}
                 />
               )}
               <motion.button
                 type="submit"
-                className="px-6 py-3 mt-6 text-white transition-colors duration-300 bg-teal-500 rounded-lg shadow-md hover:bg-teal-600"
+                className="px-6 py-3 mt-6 text-white bg-teal-500 rounded-lg shadow-md hover:bg-teal-600"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -131,12 +147,9 @@ export default function UniversalResumeBuilder() {
           </div>
         </div>
       </div>
-
-      <AnimatePresence>
-        {showPreview && (
-          <ResumePreview formData={formData} onClose={() => setShowPreview(false)} />
-        )}
-      </AnimatePresence>
+      {showPreview && (
+        <ResumePreview formData={formData} onClose={() => setShowPreview(false)} />
+      )}
     </div>
   );
 }
@@ -144,7 +157,7 @@ export default function UniversalResumeBuilder() {
 function TabButton({ id, label, icon: Icon, isActive, onClick }) {
   return (
     <motion.button
-      className={`flex items-center w-full p-3 mb-2 rounded-lg transition-colors ${
+      className={`flex items-center w-full p-3 mb-2 rounded-lg ${
         isActive ? 'bg-teal-500 text-white' : 'text-teal-700 hover:bg-teal-100'
       }`}
       onClick={onClick}
@@ -194,10 +207,10 @@ function AboutSection({ data, onChange }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <InputField label="Full Name" value={data.name} onChange={(value) => onChange('name', value)} placeholder="John Doe" />
-      <InputField label="Email" type="email" value={data.email} onChange={(value) => onChange('email', value)} placeholder="john@example.com" />
-      <InputField label="Phone" type="tel" value={data.phone} onChange={(value) => onChange('phone', value)} placeholder="+1 (555) 123-4567" />
-      <InputField label="Location" value={data.location} onChange={(value) => onChange('location', value)} placeholder="New York, NY" />
+      <InputField label="Full Name" value={data.name} onChange={(value) => onChange('name', value)} />
+      <InputField label="Email" type="email" value={data.email} onChange={(value) => onChange('email', value)} />
+      <InputField label="Phone" type="tel" value={data.phone} onChange={(value) => onChange('phone', value)} />
+      <InputField label="Location" value={data.location} onChange={(value) => onChange('location', value)} />
       <div className="mb-4">
         <label className="block mb-1 text-sm font-medium text-teal-700">Profession Category</label>
         <select
@@ -211,70 +224,37 @@ function AboutSection({ data, onChange }) {
           ))}
         </select>
       </div>
-      <TextArea label="Professional Summary" value={data.summary} onChange={(value) => onChange('summary', value)} placeholder="Write a brief summary of your professional background and career objectives..." />
+      <TextArea label="Professional Summary" value={data.summary} onChange={(value) => onChange('summary', value)} />
     </motion.div>
   );
 }
 
-function EducationSection({ data, onChange }) {
+function DynamicSection({ data, onChange, onAdd, onRemove, renderFields }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <InputField label="Degree/Certification" value={data.degree} onChange={(value) => onChange('degree', value)} placeholder="Bachelor of Arts in Communication" />
-      <InputField label="Institution" value={data.institution} onChange={(value) => onChange('institution', value)} placeholder="University of Example" />
-      <InputField label="Completion Year" type="number" value={data.year} onChange={(value) => onChange('year', value)} placeholder="2023" />
-      <TextArea label="Achievements/Honors" value={data.achievements} onChange={(value) => onChange('achievements', value)} placeholder="List any academic achievements, honors, or relevant coursework..." />
-    </motion.div>
-  );
-}
-
-function SkillsSection({ data, onChange }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <TextArea label="Professional Skills" value={data.professional} onChange={(value) => onChange('professional', value)} placeholder="List your professional skills relevant to your field..." />
-      <TextArea label="Personal Skills" value={data.personal} onChange={(value) => onChange('personal', value)} placeholder="List your personal skills (e.g., communication, teamwork, problem-solving)..." />
-      <TextArea label="Languages" value={data.languages} onChange={(value) => onChange('languages', value)} placeholder="List languages you speak and your proficiency level..." />
-    </motion.div>
-  );
-}
-
-function ExperienceSection({ data, onChange, onFileChange }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <InputField label="Job Title" value={data.title} onChange={(value) => onChange('title', value)} placeholder="Marketing Manager" />
-      <InputField label="Company/Organization" value={data.company} onChange={(value) => onChange('company', value)} placeholder="Global Innovations Inc." />
-      <InputField label="Employment Period" value={data.period} onChange={(value) => onChange('period', value)} placeholder="Jan 2020 - Present" />
-      <TextArea label="Key Responsibilities" value={data.responsibilities} onChange={(value) => onChange('responsibilities', value)} placeholder="Describe your key responsibilities and achievements in this role..." />
-      <div className="mt-6">
-        <h3 className="mb-2 text-lg font-semibold text-teal-700">Upload Additional Documents or Images</h3>
-        <div className="flex items-center justify-center w-full">
-          <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-teal-300 border-dashed rounded-lg cursor-pointer bg-teal-50 hover:bg-teal-100">
-            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              <Upload className="w-10 h-10 mb-3 text-teal-500" />
-              <p className="mb-2 text-sm text-teal-700"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-              <p className="text-xs text-teal-500">PDF or Image (MAX. 10MB)</p>
-            </div>
-            <input id="dropzone-file" type="file" className="hidden" accept=".pdf,image/*" onChange={onFileChange} />
-          </label>
+      {data.map((item, index) => (
+        <div key={index} className="p-4 mb-6 border border-teal-200 rounded-lg">
+          {renderFields(item, index)}
+          <button
+            type="button"
+            onClick={() => onRemove(index)}
+            className="px-3 py-1 mt-2 text-sm text-red-600 border border-red-600 rounded hover:bg-red-100"
+          >
+            Remove
+          </button>
         </div>
-        {data.media && (
-          <p className="mt-2 text-sm text-teal-600">
-            <Paperclip className="inline-block mr-1" size={16} />
-            {data.media.name}
-          </p>
-        )}
-      </div>
+      ))}
+      <button
+        type="button"
+        onClick={onAdd}
+        className="px-4 py-2 mt-2 text-teal-600 border border-teal-600 rounded hover:bg-teal-100"
+      >
+        Add New
+      </button>
     </motion.div>
   );
 }
@@ -296,57 +276,37 @@ function ResumePreview({ formData, onClose }) {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-teal-700">Resume Preview</h2>
           <button onClick={onClose} className="text-teal-500 hover:text-teal-700">
-            <X size={24} />
+            &times;
           </button>
         </div>
-
         <div className="space-y-6">
-          <section>
-            <h3 className="mb-2 text-xl font-semibold text-teal-600">About</h3>
-            <p><strong>Name:</strong> {formData.about.name}</p>
-            <p><strong>Email:</strong> {formData.about.email}</p>
-            <p><strong>Phone:</strong> {formData.about.phone}</p>
-            <p><strong>Location:</strong> {formData.about.location}</p>
-            <p><strong>Profession:</strong> {formData.about.profession}</p>
-            <p><strong>Summary:</strong> {formData.about.summary}</p>
-          </section>
-
-          <section>
-            <h3 className="mb-2 text-xl font-semibold text-teal-600">Education</h3>
-            <p><strong>Degree/Certification:</strong>   {formData.education.degree}</p>
-            <p><strong>Institution:</strong> {formData.education.institution}</p>
-            <p><strong>Year:</strong> {formData.education.year}</p>
-            <p><strong>Achievements:</strong> {formData.education.achievements}</p>
-          </section>
-
-          <section>
-            <h3 className="mb-2 text-xl font-semibold text-teal-600">Skills</h3>
-            <p><strong>Professional Skills:</strong> {formData.skills.professional}</p>
-            <p><strong>Personal Skills:</strong> {formData.skills.personal}</p>
-            <p><strong>Languages:</strong> {formData.skills.languages}</p>
-          </section>
-
-          <section>
-            <h3 className="mb-2 text-xl font-semibold text-teal-600">Experience</h3>
-            <p><strong>Job Title:</strong> {formData.experience.title}</p>
-            <p><strong>Company/Organization:</strong> {formData.experience.company}</p>
-            <p><strong>Period:</strong> {formData.experience.period}</p>
-            <p><strong>Responsibilities:</strong> {formData.experience.responsibilities}</p>
-            {formData.experience.media && (
-              <div>
-                <p><strong>Uploaded File:</strong> {formData.experience.media.name}</p>
-                {formData.experience.media.type.startsWith('image/') && (
-                  <img 
-                    src={URL.createObjectURL(formData.experience.media)} 
-                    alt="Uploaded content" 
-                    className="h-auto max-w-full mt-2 rounded-lg shadow-md"
-                  />
-                )}
-              </div>
-            )}
-          </section>
+          <PreviewSection title="About" data={formData.about} />
+          <PreviewSection title="Education" data={formData.education} />
+          <PreviewSection title="Skills" data={formData.skills} />
+          <PreviewSection title="Experience" data={formData.experience} />
         </div>
       </motion.div>
     </motion.div>
+  );
+}
+
+function PreviewSection({ title, data }) {
+  return (
+    <section>
+      <h3 className="mb-2 text-xl font-semibold text-teal-600">{title}</h3>
+      {Array.isArray(data) ? (
+        data.map((item, index) => (
+          <div key={index} className="mb-2">
+            {Object.entries(item).map(([key, value]) => (
+              <p key={key}><strong>{key}:</strong> {value}</p>
+            ))}
+          </div>
+        ))
+      ) : (
+        Object.entries(data).map(([key, value]) => (
+          <p key={key}><strong>{key}:</strong> {value}</p>
+        ))
+      )}
+    </section>
   );
 }
