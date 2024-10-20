@@ -83,7 +83,7 @@ const ChatBot = () => {
                   AI
                 </motion.div>
                 <div>
-                  <h3 className="text-sm font-semibold md:text-md">HomeworkHelper AI</h3>
+                  <h3 className="text-sm font-semibold md:text-md">PathFinder AI</h3>
                   <p className="text-xs text-indigo-200 md:text-sm">Your study companion</p>
                 </div>
               </div>
