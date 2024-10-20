@@ -1,13 +1,31 @@
-const getAIPrompt = (userInput, profession) => {
-    if (!userInput || !profession) {
-      throw new Error('User input and profession are required');
+const getAIPrompt = (userInput, profession, options = { logErrors: false }) => {
+    // Helper: Validate input as non-empty strings
+    const isValidString = (str) =>
+      typeof str === 'string' && str.trim().length > 0;
+  
+    // Helper: Sanitize inputs to prevent code injections (XSS, SQL injection, etc.)
+    const sanitizeInput = (input) =>
+      input.replace(/[<>`"'{}]/g, '').trim();
+  
+    // Input Validation: Strict checks with specific error messages
+    if (!isValidString(userInput)) {
+      handleInvalidInput('Invalid or missing user input');
     }
   
-    return `
+    if (!isValidString(profession)) {
+      handleInvalidInput('Invalid or missing profession input');
+    }
+  
+    // Sanitize inputs
+    const sanitizedUserInput = sanitizeInput(userInput);
+    const sanitizedProfession = sanitizeInput(profession);
+  
+    // Template
+    const prompt = `
   As RoadmapAI, an advanced career development assistant, your task is to create a comprehensive and personalized learning roadmap along with relevant flashcards for the user's profession. Analyze the user's input carefully and provide a detailed, actionable plan.
   
-  User's Profession: ${profession}
-  User's Request: ${userInput}
+  User's Profession: ${sanitizedProfession}
+  User's Request: ${sanitizedUserInput}
   
   Generate a response in the following JSON structure:
   
@@ -49,7 +67,18 @@ const getAIPrompt = (userInput, profession) => {
   7. Use clear, professional language throughout the response.
   
   Provide your response as a valid JSON object without any additional text or formatting.
-  `;
+    `;
+  
+    return prompt;
+  
+    // Handle invalid inputs with logging (if enabled)
+    function handleInvalidInput(errorMessage) {
+      if (options.logErrors) {
+        console.error(`[getAIPrompt Error] ${errorMessage}`);
+      }
+      throw new Error(errorMessage);
+    }
   };
   
   export default getAIPrompt;
+  
