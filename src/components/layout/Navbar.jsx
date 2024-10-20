@@ -5,10 +5,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth0 } from "@auth0/auth0-react";
 
 const navItems = [
-  { name: 'Home', link: '/', icon: <User size={18} /> },
-  { name: 'Build Your Resume', link: '/resume', icon: <Calendar size={18} /> },
   { name: 'Roadmap Generation', link: '/roadmap', icon: <Map size={18} /> },
   { name: 'My Progress', link: '/progress', icon: <TrendingUp size={18} /> },
+  { name: 'Build Your Resume', link: '/resume', icon: <Calendar size={18} /> }
 ];
 
 const serviceItems = [
