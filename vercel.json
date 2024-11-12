@@ -1,6 +1,6 @@
 {
     "version": 2,
-    "name": "react-basics",
+    "name": "pathfinder.ai",
     "builds": [
       {
         "src": "package.json",
@@ -11,30 +11,13 @@
       }
     ],
     "env": {
-      "NPM_FLAGS": "--legacy-peer-deps",
-      "NODE_ENV": "production"
-    },
-    "build": {
-      "env": {
-        "NPM_FLAGS": "--legacy-peer-deps"
-      },
-      "commands": {
-        "install": "npm install --legacy-peer-deps",
-        "build": "vite build"
-      }
+      "NPM_FLAGS": "--legacy-peer-deps"
     },
     "routes": [
       {
         "src": "/(.*)",
         "dest": "/index.html"
       }
-    ],
-    "functions": {
-      "api/**.js": {
-        "runtime": "nodejs16.x"
-      }
-    },
-    "cache": {
-      "files": ["node_modules/**", "dist/**"]
-    }
-  }  
+    ]
+  }
+  
