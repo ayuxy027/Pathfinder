@@ -1,5 +1,7 @@
 // useSpeechSynthesis.js
-import { useState, useEffect } from 'react'
+import { useState, useCallback, useEffect } from 'react'
+import { useLocalStorage } from './useLocalStorage'
+import { getAIResponse } from '../aiService'
 
 export const useSpeechSynthesis = () => {
   const [speaking, setSpeaking] = useState(false)
@@ -43,10 +45,7 @@ export const useSpeechSynthesis = () => {
 }
 
 // Updated useChatbot.js
-import { useState, useCallback, useEffect } from 'react'
-import { useLocalStorage } from './useLocalStorage'
-import { getAIResponse } from '../aiService'
-import { useSpeechSynthesis } from './useSpeechSynthesis'
+
 
 export const useChatbot = () => {
   const [messages, setMessages] = useLocalStorage('homework-helper-messages', [])
