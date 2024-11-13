@@ -1,7 +1,52 @@
+// useSpeechSynthesis.js
+import { useState, useEffect } from 'react'
+
+export const useSpeechSynthesis = () => {
+  const [speaking, setSpeaking] = useState(false)
+  const [speechSynth, setSpeechSynth] = useState(null)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      setSpeechSynth(window.speechSynthesis)
+    }
+  }, [])
+
+  const speak = ({ text }) => {
+    if (!speechSynth) return
+
+    // Cancel any ongoing speech
+    cancel()
+
+    const utterance = new SpeechSynthesisUtterance(text)
+    
+    utterance.onstart = () => setSpeaking(true)
+    utterance.onend = () => setSpeaking(false)
+    utterance.onerror = () => setSpeaking(false)
+
+    speechSynth.speak(utterance)
+  }
+
+  const cancel = () => {
+    if (speechSynth) {
+      setSpeaking(false)
+      speechSynth.cancel()
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      cancel()
+    }
+  }, [])
+
+  return { speak, cancel, speaking }
+}
+
+// Updated useChatbot.js
 import { useState, useCallback, useEffect } from 'react'
 import { useLocalStorage } from './useLocalStorage'
 import { getAIResponse } from '../aiService'
-import { useSpeechSynthesis } from 'react-speech-kit'
+import { useSpeechSynthesis } from './useSpeechSynthesis'
 
 export const useChatbot = () => {
   const [messages, setMessages] = useLocalStorage('homework-helper-messages', [])
@@ -89,6 +134,12 @@ export const useChatbot = () => {
       setListening(true)
     }
   }, [listening])
+
+  useEffect(() => {
+    return () => {
+      cancel() // Cleanup any ongoing speech when component unmounts
+    }
+  }, [cancel])
 
   return {
     messages,
