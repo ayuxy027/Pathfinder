@@ -1,210 +1,267 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { Link } from 'react-router-dom';
-import { motion, useAnimation, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Briefcase, Compass, Lightbulb, GraduationCap, Users, Target, TrendingUp, BookOpen, Laptop, Presentation, Award, Clipboard, FileText, Zap, Rocket, Brain, Sparkles} from 'lucide-react'
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, useAnimation } from 'framer-motion';
+import { gsap } from 'gsap';
+import { ChevronRight, GraduationCap, Target, Users, Sparkles, MessageSquare, FileText, Map, Brain, Briefcase, Award, Flag, Star, Settings, Heart, Code, Coffee } from 'lucide-react';
 
-const dynamicWords = ["AI-Powered", "Personalized", "Future-Ready"]
+const dynamicWords = ["AI-Powered", "Personalized", "Future-Ready"];
 
-export default function Component() {
-  const [dynamicText, setDynamicText] = useState('')
-  const [wordIndex, setWordIndex] = useState(0)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const controls = useAnimation()
+const cardDataLeft = [
+  { icon: GraduationCap, title: "Learn", description: "Custom path", color: "#0D9488" },
+  { icon: Target, title: "Focus", description: "Clear goals", color: "#0E7490" },
+  { icon: Users, title: "Connect", description: "Build network", color: "#0369A1" },
+  { icon: Sparkles, title: "Grow", description: "New skills", color: "#0D9488" },
+  { icon: MessageSquare, title: "Chat", description: "Get help", color: "#0E7490" },
+  { icon: FileText, title: "Create", description: "Pro resume", color: "#0369A1" },
+  { icon: Brain, title: "Think", description: "Stay sharp", color: "#0D9488" },
+  { icon: Map, title: "Plan", description: "Your future", color: "#0E7490" },
+  { icon: Briefcase, title: "Work", description: "Dream job", color: "#0369A1" },
+  { icon: Award, title: "Achieve", description: "Excellence", color: "#0D9488" }
+];
 
-  const handleTyping = useCallback(() => {
-    const currentWord = dynamicWords[wordIndex]
-    const shouldDelete = isDeleting && dynamicText === ''
-    const shouldChangeWord = !isDeleting && dynamicText === currentWord
+const cardDataRight = [
+  { icon: Flag, title: "Start", description: "Journey begins", color: "#0E7490" },
+  { icon: Star, title: "Excel", description: "Stand out", color: "#0D9488" },
+  { icon: Settings, title: "Adjust", description: "Fine tune", color: "#0369A1" },
+  { icon: Heart, title: "Passion", description: "Love work", color: "#0E7490" },
+  { icon: Code, title: "Build", description: "Create value", color: "#0D9488" },
+  { icon: Coffee, title: "Balance", description: "Work-life", color: "#0369A1" },
+  { icon: Target, title: "Aim", description: "Hit goals", color: "#0E7490" },
+  { icon: Brain, title: "Learn", description: "Grow skills", color: "#0D9488" },
+  { icon: Users, title: "Team", description: "Collaborate", color: "#0369A1" },
+  { icon: Sparkles, title: "Shine", description: "Be best", color: "#0E7490" }
+];
 
-    if (shouldDelete) {
-      setIsDeleting(false)
-      setWordIndex((prevIndex) => (prevIndex + 1) % dynamicWords.length)
-    } else if (shouldChangeWord) {
-      setIsDeleting(true)
-    } else {
-      setDynamicText(prevText =>
-        isDeleting ? currentWord.slice(0, prevText.length - 1) : currentWord.slice(0, prevText.length + 1)
-      )
-    }
-  }, [dynamicText, isDeleting, wordIndex])
+const cardVariants = {
+  initial: { opacity: 0, y: 20, scale: 0.9 },
+  animate: (index) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.6,
+      delay: index * 0.1,
+      ease: [0.43, 0.13, 0.23, 0.96],
+    },
+  }),
+};
+
+const MarqueeColumn = React.memo(({ cards, isLeft, containerRef }) => {
+  const scrollerRef = useRef(null);
+  const sentinel = useRef(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      handleTyping()
-    }, isDeleting ? 120 : 180)
-    return () => clearTimeout(timer)
-  }, [handleTyping, isDeleting])
+    if (!scrollerRef.current || !sentinel.current) return;
 
-  useEffect(() => {
-    controls.start({
-      y: 0,
-      opacity: 1,
-      transition: { duration: 0.8, ease: "easeOut" }
-    })
-  }, [controls])
+    const scroller = scrollerRef.current;
+    const scrollHeight = scroller.offsetHeight;
+    const container = containerRef.current;
 
-  return (
-    <section className="relative py-0 overflow-hidden bg-white sm:py-20 lg:py-20 font-body">
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute inset-0 opacity-20"
-          animate={{
-            background: [
-              "radial-gradient(circle, rgba(255,255,255,0) 0%, rgba(200,200,255,0.3) 100%)",
-              "radial-gradient(circle, rgba(255,255,255,0) 0%, rgba(255,200,200,0.3) 100%)",
-              "radial-gradient(circle, rgba(255,255,255,0) 0%, rgba(200,255,200,0.3) 100%)",
-            ],
-          }}
-          transition={{ duration: 10, repeat: Infinity, repeatType: "reverse" }}
-        />
-      </div>
-      <div className="relative flex flex-col items-center px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 lg:flex-row">
-        <motion.div 
-          className="text-center lg:text-left lg:w-1/2"
-          initial={{ opacity: 0, y: 20 }}
-          animate={controls}
-        >
-          <motion.h1 
-            className="text-4xl font-bold leading-tight text-transparent bg-proj bg-clip-text sm:text-5xl sm:leading-tight lg:leading-tight lg:text-6xl"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            Navigate Your Career with, <br />
-            <motion.span 
-              className="text-transparent bg-yellow-500 bg-clip-text" 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              {dynamicText}
-              <span className="animate-blink">|</span>
-            </motion.span>
-            <br />
-            <span className="text-transparent bg-yellow-500 bg-clip-text">Guidance</span>
-          </motion.h1>
-          <motion.p 
-            className="mt-4 text-xl text-transparent bg-proj bg-clip-text sm:mt-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            Unlock your potential with our AI-powered career guidance platform.
-            Discover tailored paths and seize opportunities for success.
-          </motion.p>
-          <motion.div 
-            className="flex flex-col justify-center mt-8 space-y-4 sm:flex-row lg:justify-start sm:space-y-0 sm:space-x-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
-            <Button to="/get-started">
-              Get Started
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          </motion.div>
-        </motion.div>
-        <AnimatePresence>
-          {typeof window !== 'undefined' && window.innerWidth >= 640 && (
-            <motion.div
-              key="animations"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="lg:w-1/2 h-[500px] mt-12 lg:mt-0 relative"
-            >
-              <FloatingIcon Icon={Briefcase} size={120} top="50%" left="50%" scale={[1, 1.1, 1]} rotate={[0, 5, -5, 0]} />
-              <FloatingIcon Icon={Compass} size={64} top="25%" left="25%" y={[0, -20, 0]} />
-              <FloatingIcon Icon={Lightbulb} size={64} top="75%" left="75%" y={[0, 20, 0]} />
-              <FloatingIcon Icon={GraduationCap} size={48} top="66%" left="33%" x={[0, 30, 0]} y={[0, -30, 0]} />
-              <FloatingIcon Icon={Users} size={56} top="16%" left="75%" rotate={[0, 360]} duration={10} />
-              <FloatingIcon Icon={Target} size={52} top="83%" left="25%" scale={[1, 1.2, 1]} />
-              <FloatingIcon Icon={TrendingUp} size={60} top="50%" left="83%" x={[0, 20, 0]} />
-              <FloatingIcon Icon={BookOpen} size={44} top="75%" left="16%" y={[0, -15, 0]} duration={2} />
-              <FloatingIcon Icon={Laptop} size={40} top="33%" left="66%" rotate={[0, -10, 10, 0]} duration={3} />
-              <FloatingIcon Icon={Presentation} size={48} top="10%" left="40%" scale={[1, 1.15, 1]} duration={4} />
-              <FloatingIcon Icon={Award} size={52} top="60%" left="10%" y={[0, 25, 0]} duration={3.5} />
-              <FloatingIcon Icon={Clipboard} size={56} top="40%" left="90%" rotate={[0, -15, 15, 0]} duration={4.5} />
-              <FloatingIcon Icon={FileText} size={44} top="5%" left="60%" rotate={[0, 360]} duration={8} />
-              <FloatingIcon Icon={Zap} size={48} top="85%" left="45%" scale={[1, 1.1, 1]} duration={3} />
-              <FloatingIcon Icon={Rocket} size={36} top="45%" left="70%" rotate={[0, -10, 10, 0]} duration={3.5} />
-              <FloatingIcon Icon={Brain} size={32} top="70%" left="5%" y={[0, 20, 0]} duration={4} />
-              <FloatingIcon Icon={Sparkles} size={28} top="15%" left="90%" rotate={[0, 360]} duration={9} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-      <ParticleBackground />
-    </section>
-  )
-}
+    const resetPosition = () => {
+      if (!container) return;
+      const scrollTop = container.scrollTop;
+      const maxScroll = scrollHeight / 2;
+      
+      if (scrollTop >= maxScroll) {
+        container.scrollTop = 0;
+      } else if (scrollTop <= 0) {
+        container.scrollTop = maxScroll;
+      }
+    };
 
-function Button({ children, variant = "primary", className = "", to = "" }) {
-  const baseClasses = "flex items-center justify-center px-6 py-3 text-base font-medium rounded-md transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
-  const variantClasses = variant === "primary" 
-    ? "bg-proj hover:bg-proj-hover text-white" 
-    : "bg-white hover:bg-gray-100 text-proj border border-proj"
+    // Initial scroll position
+    container.scrollTop = scrollHeight / 4;
 
-  const MotionLink = motion(Link);
+    const animate = () => {
+      if (!container) return;
+      container.scrollTop += isLeft ? 1 : -1;
+      resetPosition();
+      requestRef.current = requestAnimationFrame(animate);
+    };
+
+    const requestRef = { current: requestAnimationFrame(animate) };
+
+    return () => {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+    };
+  }, [isLeft, containerRef]);
 
   return (
-    <MotionLink
-      to={to}
-      className={`${baseClasses} ${variantClasses} ${className}`}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      {children}
-    </MotionLink>
-  )
-}
-
-function FloatingIcon({ Icon, size, top, left, ...motionProps }) {
-  return (
-    <motion.div 
-      className="absolute text-proj"
-      style={{ top, left }}
-      animate={{
-        y: [0, -10, 0],
-        ...motionProps.animate
-      }}
-      transition={{
-        duration: 5,
-        ease: "easeInOut",
-        times: [0, 0.5, 1],
-        repeat: Infinity,
-        ...motionProps.transition
-      }}
-    >
-      <Icon size={size} />
-    </motion.div>
-  )
-}
-
-function ParticleBackground() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(30)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full bg-proj opacity-20"
-          style={{
-            width: Math.random() * 4 + 1,
-            height: Math.random() * 4 + 1,
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0.2, 0.5, 0.2],
-          }}
-          transition={{
-            duration: Math.random() * 5 + 5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
+    <div ref={scrollerRef} className="flex flex-col gap-6 py-6">
+      {[...cards, ...cards, ...cards].map((card, index) => (
+        <Card key={`${index}-${card.title}`} card={card} index={index % cards.length} isLeft={isLeft} />
       ))}
+      <div ref={sentinel} className="h-px" />
     </div>
-  )
+  );
+});
+
+const Card = React.memo(({ card, index, isLeft }) => {
+  const Icon = card.icon;
+  const controls = useAnimation();
+
+  useEffect(() => {
+    controls.start("animate");
+  }, [controls]);
+
+  return (
+    <motion.div
+      custom={index}
+      variants={cardVariants}
+      initial="initial"
+      animate={controls}
+      className="w-full transform-gpu"
+    >
+      <div 
+        className={`p-4 transition-all duration-500 bg-white border shadow-lg rounded-xl backdrop-blur-lg border-teal-50
+          ${isLeft ? 'translate-x-2' : '-translate-x-2'}`}
+        style={{
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+          transform: `perspective(1000px) rotateY(${isLeft ? '5deg' : '-5deg'})`,
+        }}
+      >
+        <div className="flex items-center space-x-4">
+          <div 
+            className="p-3 rounded-lg"
+            style={{ backgroundColor: `${card.color}15`, color: card.color }}
+          >
+            <Icon className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-gray-800">{card.title}</h3>
+            <p className="text-sm text-gray-600">{card.description}</p>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+});
+
+function HeroSection() {
+  const [dynamicText, setDynamicText] = useState('');
+  const [wordIndex, setWordIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const leftColumnRef = useRef(null);
+  const rightColumnRef = useRef(null);
+
+  useEffect(() => {
+    const typeWriter = () => {
+      const currentWord = dynamicWords[wordIndex];
+      const shouldDelete = isDeleting && dynamicText === '';
+      const shouldChangeWord = !isDeleting && dynamicText === currentWord;
+
+      if (shouldDelete) {
+        setIsDeleting(false);
+        setWordIndex((prevIndex) => (prevIndex + 1) % dynamicWords.length);
+      } else if (shouldChangeWord) {
+        setIsDeleting(true);
+      } else {
+        setDynamicText(prevText =>
+          isDeleting ? currentWord.slice(0, prevText.length - 1) : currentWord.slice(0, prevText.length + 1)
+        );
+      }
+    };
+
+    const timer = setTimeout(typeWriter, isDeleting ? 100 : 150);
+    return () => clearTimeout(timer);
+  }, [dynamicText, isDeleting, wordIndex]);
+
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-br from-white to-teal-50">
+      <BackgroundEffects />
+      <div className="relative px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="grid items-center grid-cols-1 gap-12 py-12 md:grid-cols-2">
+          <LeftContent dynamicText={dynamicText} />
+          <div className="relative grid grid-cols-2 gap-8 h-[700px]">
+            <div ref={leftColumnRef} className="relative h-full overflow-hidden">
+              <MarqueeColumn 
+                cards={cardDataLeft} 
+                isLeft={true}
+                containerRef={leftColumnRef}
+              />
+            </div>
+            <div ref={rightColumnRef} className="relative h-full overflow-hidden">
+              <MarqueeColumn 
+                cards={cardDataRight} 
+                isLeft={false}
+                containerRef={rightColumnRef}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
+
+function BackgroundEffects() {
+  const bgRef = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(bgRef.current.children, {
+        scale: 0,
+        opacity: 0,
+        duration: 2,
+        stagger: 0.3,
+        ease: "power3.out",
+      });
+    }, bgRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <div ref={bgRef} className="absolute inset-0 pointer-events-none">
+      <div className="absolute top-0 left-0 w-[800px] h-[800px] rounded-full bg-teal-200/20 blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-[800px] h-[800px] rounded-full bg-teal-200/20 blur-3xl" />
+    </div>
+  );
+}
+
+function LeftContent({ dynamicText }) {
+  const contentRef = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(contentRef.current.children, {
+        y: 50,
+        opacity: 0,
+        duration: 1.2,
+        stagger: 0.3,
+        ease: "power4.out",
+      });
+    }, contentRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <div ref={contentRef} className="relative z-10">
+      <h1 className="text-4xl font-bold leading-tight lg:text-5xl xl:text-6xl">
+        <span className="text-teal-600">Navigate Your Career</span>
+        <br />
+        <span className="text-amber-400">
+          {dynamicText}
+          <span className="animate-blink">|</span>
+        </span>
+        <br />
+        <span className="text-teal-600">Today!</span>
+      </h1>
+      
+      <p className="mt-6 text-lg leading-relaxed text-gray-600 sm:text-xl">
+        Discover your perfect career path with AI-powered guidance and personalized recommendations.
+      </p>
+
+      <div className="mt-8 sm:mt-10">
+        <button className="flex items-center px-8 py-3 text-base font-semibold text-white transition-all transform bg-teal-600 rounded-full sm:text-lg hover:bg-teal-700 hover:scale-105 group">
+          Get Started
+          <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default HeroSection;
