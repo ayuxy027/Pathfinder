@@ -6,9 +6,9 @@ Welcome to **Pathfinder**! 🎓
 
 **Pathfinder** is a career guidance tool built with **React**, **Vite**, and **Tailwind CSS** 👀
 
-This project was created as our **submission for Codelite 2024**, crafted within a **stunning 24-hour timeline**! Pathfinder is here to **Guide Students and Users on Tailored Paths** based on their unique interests, offering tools that go beyond traditional recommendations. 🌟
+This project was created as our **submission for Codelite 2024**, crafted within a **24-hour timeline**! 
 
-Our USP is that it’s **Profession-Independent** and includes an **Integrated Chatbot** for instant answers, along with a built-in **Resume Generator**. 📄
+Discover tailored paths and seize opportunities for success
 
 ## Tech Stack
 
@@ -18,30 +18,7 @@ Our USP is that it’s **Profession-Independent** and includes an **Integrated C
 - **Supabase** (Backend)
 - **Auth0 by Okta** (Authentication)
 - **Google Gemini Pro 1.5** (Generative AI)
-- **React Speech Kit** (Text-to-Speech)
 - **Markdown Renderer**
-
-## Dependencies
-
-### Core Dependencies
-
-- **`React`**
-- **`Vite`**
-- **`Tailwind CSS`**
-- **`Supabase`**
-- **`Auth0 by Okta`**
-- **`Google Gemini Pro 1.5`** for AI capabilities
-- **`React Speech Kit`** for Text-to-Speech
-- **`Markdown Renderer`**
-
-### Development Dependencies
-
-- **`Autoprefixer`**
-- **`ESLint`**
-- **`Postcss`**
-- **`Prettier`**
-- **`Tailwind-CSS`**
-- **`Vite Processor`**
 
 ## Features
 
