@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useAuth0 } from '@auth0/auth0-react';
@@ -8,13 +8,13 @@ import EnhancedLoadingSpinner from './components/shared/EnhancedLoadingSpinner';
 import ErrorFallback from './components/shared/ErrorFallback';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Lazy load pages
-const Home = lazy(() => import('./pages/Home.jsx'));
-const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
-const Progress = lazy(() => import('./pages/Progress.jsx'));
-const Quiz = lazy(() => import('./pages/Quiz.jsx'));
-const Resume = lazy(() => import('./pages/Resume.jsx'));
-const Roadmap = lazy(() => import('./pages/Roadmap.jsx'));
+// Direct imports instead of lazy loading
+import Home from './pages/Home.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import Progress from './pages/Progress.jsx';
+import Quiz from './pages/Quiz.jsx';
+import Resume from './pages/Resume.jsx';
+import Roadmap from './pages/Roadmap.jsx';
 
 function App() {
   const { isLoading } = useAuth0();
@@ -29,35 +29,33 @@ function App() {
         <div className="flex flex-col min-h-screen App">
           <Navbar />
           <main className="flex-grow">
-            <Suspense fallback={<EnhancedLoadingSpinner />}>
-              <Routes>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/" element={<Home />} />
-                <Route path="/progress" element={
-                  <ProtectedRoute>
-                    <Progress />
-                  </ProtectedRoute>
-                } />
-                <Route path="/quiz" element={
-                  <ProtectedRoute>
-                    <Quiz />
-                  </ProtectedRoute>
-                } />
-                <Route path="/resume" element={
-                  <ProtectedRoute>
-                    <Resume />
-                  </ProtectedRoute>
-                } />
-                <Route path="/roadmap" element={
-                  <ProtectedRoute>
-                    <Roadmap />
-                  </ProtectedRoute>
-                } />
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/progress" element={
+                <ProtectedRoute>
+                  <Progress />
+                </ProtectedRoute>
+              } />
+              <Route path="/quiz" element={
+                <ProtectedRoute>
+                  <Quiz />
+                </ProtectedRoute>
+              } />
+              <Route path="/resume" element={
+                <ProtectedRoute>
+                  <Resume />
+                </ProtectedRoute>
+              } />
+              <Route path="/roadmap" element={
+                <ProtectedRoute>
+                  <Roadmap />
+                </ProtectedRoute>
+              } />
 
-                {/* Catch-all route for 404 */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Suspense>
+              {/* Catch-all route for 404 */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
           </main>
           <Footer />
         </div>
