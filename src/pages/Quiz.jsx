@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { useAuth0 } from '@auth0/auth0-react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import * as shiki from 'shiki';
+import { useRef } from 'react';
 
 const questions = [
   {
@@ -65,6 +65,30 @@ const LegendaryQuiz = () => {
   const [streak, setStreak] = useState(0);
   const [highestStreak, setHighestStreak] = useState(0);
   const [showHint, setShowHint] = useState(false);
+  const [highlighter, setHighlighter] = useState(null);
+  const codeRefs = useRef({});
+
+  useEffect(() => {
+    // Initialize shiki highlighter
+    const initHighlighter = async () => {
+      const highlighter = await shiki.getHighlighter({
+        theme: 'dracula'
+      });
+      setHighlighter(highlighter);
+    };
+    
+    initHighlighter();
+  }, []);
+
+  useEffect(() => {
+    // Apply syntax highlighting to code blocks when highlighter is ready
+    if (highlighter && questions[currentQuestion]?.code && codeRefs.current[currentQuestion]) {
+      const code = questions[currentQuestion].code;
+      const language = code.includes('const') || code.includes('console.log') ? 'javascript' : 'css';
+      const html = highlighter.codeToHtml(code, { lang: language });
+      codeRefs.current[currentQuestion].innerHTML = html;
+    }
+  }, [currentQuestion, highlighter]);
 
   useEffect(() => {
     if (showScore) return;
@@ -212,9 +236,13 @@ const LegendaryQuiz = () => {
                 >
                   <p className="mb-4 text-xl">{questions[currentQuestion].question}</p>
                   {questions[currentQuestion].code && (
-                    <SyntaxHighlighter language="javascript" style={dracula} className="mb-4 rounded-lg">
-                      {questions[currentQuestion].code}
-                    </SyntaxHighlighter>
+                    <div 
+                      ref={el => codeRefs.current[currentQuestion] = el} 
+                      className="mb-4 rounded-lg overflow-auto"
+                      style={{ backgroundColor: '#282a36' }}
+                    >
+                      {!highlighter && <pre className="p-4 text-white">{questions[currentQuestion].code}</pre>}
+                    </div>
                   )}
                   <div className="mb-6 space-y-4">
                     {questions[currentQuestion].options.map((option, index) => (
