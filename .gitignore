@@ -58,6 +58,7 @@ yarn.lock
 .pnp.*
 .yarn-integrity
 pnpm-lock.yaml
+package-lock.json
 
 # Testing artifacts
 *.lcov
