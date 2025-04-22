@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User, LogOut, LogIn, Settings, HelpCircle, Bell, Calendar, Briefcase, TrendingUp, Link as LinkIcon, Map, FileQuestion, ChevronDown } from 'lucide-react';
+import { Menu, X, Briefcase, ChevronDown, Map, TrendingUp, Calendar, FileQuestion } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth0 } from "@auth0/auth0-react";
 
 const navItems = [
   { name: 'Roadmap Generation', link: '/roadmap', icon: <Map size={18} /> },
@@ -19,21 +18,11 @@ const externalResources = [
   { name: 'Coursera Course', link: 'https://www.coursera.org/learn/algorithms-part1', icon: '↗️' }
 ];
 
-// Dummy data for user stats
-const userStats = {
-  completedCourses: 12,
-  ongoingCourses: 3,
-  achievements: 8,
-  nextMilestone: 'Advanced Level'
-};
-
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [showUserCard, setShowUserCard] = useState(false);
   const [showServicesDropdown, setShowServicesDropdown] = useState(false);
   const location = useLocation();
-  const { loginWithRedirect, logout, user, isLoading, isAuthenticated } = useAuth0();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,18 +39,8 @@ export default function Navbar() {
     setIsOpen(!isOpen);
   };
 
-  const toggleUserCard = () => {
-    setShowUserCard(!showUserCard);
-  };
-
   const toggleServicesDropdown = () => {
     setShowServicesDropdown(!showServicesDropdown);
-  };
-
-  const handleLogin = () => loginWithRedirect();
-  const handleLogout = () => {
-    logout({ returnTo: window.location.origin });
-    setShowUserCard(false);
   };
 
   return (
@@ -69,36 +48,23 @@ export default function Navbar() {
       <div className="h-20"></div>
       <motion.nav
         className={`fixed top-0 left-0 right-0 z-50 font-body transition-colors duration-300 ease-in-out 
-          ${isScrolled ? 'bg-teal-800/90 backdrop-blur-sm shadow-md' : 'bg-teal-700'}
+          ${isScrolled ? 'shadow-md backdrop-blur-sm bg-teal-800/90' : 'bg-teal-700'}
         `}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex justify-between items-center h-20">
             <Logo />
             <DesktopNav location={location} showServicesDropdown={showServicesDropdown} toggleServicesDropdown={toggleServicesDropdown} />
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <AuthButton
-                isLoading={isLoading}
-                isAuthenticated={isAuthenticated}
-                user={user}
-                onLogin={handleLogin}
-                onLogout={handleLogout}
-                toggleUserCard={toggleUserCard}
-              />
               <MobileMenuToggle isOpen={isOpen} toggleMenu={toggleMenu} />
             </div>
           </div>
         </div>
         <MobileMenu isOpen={isOpen} location={location} />
       </motion.nav>
-      <AnimatePresence>
-        {showUserCard && (
-          <UserCard user={user} userStats={userStats} onClose={toggleUserCard} onLogout={handleLogout} />
-        )}
-      </AnimatePresence>
     </>
   );
 }
@@ -183,7 +149,7 @@ function ServicesDropdown({ showServicesDropdown, toggleServicesDropdown, locati
       <AnimatePresence>
         {showServicesDropdown && (
           <motion.div
-            className="absolute right-0 w-64 mt-2 bg-white rounded-md shadow-lg"
+            className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -226,7 +192,7 @@ function MobileMenuToggle({ isOpen, toggleMenu }) {
     <motion.button
       onClick={toggleMenu}
       type="button"
-      className="inline-flex items-center justify-center p-2 ml-4 rounded-md sm:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500"
+      className="inline-flex justify-center items-center p-2 ml-4 rounded-md sm:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500"
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
     >
@@ -241,7 +207,7 @@ function MobileMenu({ isOpen, location }) {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="sm:hidden bg-teal-800/95 backdrop-blur-sm"
+          className="backdrop-blur-sm sm:hidden bg-teal-800/95"
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: 'auto', opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
@@ -310,124 +276,5 @@ function MobileNavItem({ to, text, icon, isActive }) {
         </motion.div>
       </Link>
     </motion.div>
-  );
-}
-
-function AuthButton({ isLoading, isAuthenticated, user, onLogin, onLogout, toggleUserCard }) {
-  if (isLoading) {
-    return (
-      <motion.div
-        className="flex items-center px-4 py-2 space-x-2 text-sm font-medium text-white rounded-md bg-white/10"
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{ repeat: Infinity, duration: 1.5 }}
-      >
-        <div className="w-4 h-4 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
-        <span>Loading...</span>
-      </motion.div>
-    );
-  }
-
-  if (isAuthenticated) {
-    return (
-      <motion.div
-        className="relative"
-        initial={false}
-        animate={{ scale: [0.9, 1], opacity: [0, 1] }}
-        transition={{ duration: 0.2 }}
-      >
-        <motion.button
-          onClick={toggleUserCard}
-          className="flex items-center space-x-2 focus:outline-none"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <motion.img
-            src={user.picture}
-            alt={user.name}
-            className="w-8 h-8 border-2 border-yellow-400 rounded-full"
-            whileHover={{ borderColor: "#ffffff" }}
-          />
-          <motion.span 
-            className="hidden text-base font-medium text-white sm:inline-block"
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            {user.name}
-          </motion.span>
-        </motion.button>
-      
-      </motion.div>
-    );
-  }
-
-  return (
-    <motion.button
-      onClick={onLogin}
-      className="flex items-center px-4 py-2 space-x-2 text-sm font-medium text-blue-900 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
-      whileHover={{ scale: 1.05, boxShadow: '0 0 15px rgba(255, 255, 255, 0.3)' }}
-      whileTap={{ scale: 0.95 }}
-    >
-      <LogIn className="w-4 h-4" />
-      <span>Join Now</span>
-    </motion.button>
-  );
-}
-
-function UserCard({ user, userStats, onClose, onLogout }) {
-  return (
-    <motion.div
-      className="fixed z-50 overflow-hidden bg-white rounded-lg shadow-xl top-20 right-4 w-80"
-      initial={{ opacity: 0, y: -20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -20, scale: 0.95 }}
-      transition={{ duration: 0.2 }}
-    >
-      <div className="p-6 text-white bg-teal-700">
-        <div className="flex items-center space-x-4">
-          <img src={user.picture} alt={user.name} className="w-16 h-16 border-2 border-white rounded-full" />
-          <div>
-            <h3 className="text-xl font-semibold">{user.name}</h3>
-            <p className="text-sm opacity-75">{user.email}</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4 mt-4 text-center">
-          <div>
-            <p className="text-2xl font-bold">{userStats.completedCourses}</p>
-            <p className="text-xs opacity-75">Completed Courses</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold">{userStats.ongoingCourses}</p>
-            <p className="text-xs opacity-75">Ongoing Courses</p>
-          </div>
-        </div>
-      </div>
-      <div className="p-4">
-        <p className="mb-2 text-sm text-gray-600">Your Progress</p>
-        <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
-          <div className="bg-teal-600 h-2.5 rounded-full" style={{ width: '45%' }}></div>
-        </div>
-        <p className="mb-4 text-sm text-gray-600">Next milestone: {userStats.nextMilestone}</p>
-        <UserCardButton icon={<User size={18} />} text="Profile" />
-        <UserCardButton icon={<Settings size={18} />} text="Settings" />
-        <UserCardButton icon={<Bell size={18} />} text="Notifications" />
-        <UserCardButton icon={<HelpCircle size={18} />} text="Help" />
-        <UserCardButton icon={<LogOut size={18} />} text="Logout" onClick={onLogout} />
-      </div>
-    </motion.div>
-  );
-}
-
-function UserCardButton({ icon, text, onClick }) {
-  return (
-    <motion.button
-      className="flex items-center w-full px-3 py-2 text-left text-gray-700 rounded-md hover:bg-gray-100"
-      onClick={onClick}
-      whileHover={{ x: 5 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      {icon}
-      <span className="ml-2 text-sm">{text}</span>
-    </motion.button>
   );
 }
