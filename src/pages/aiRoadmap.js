@@ -14,7 +14,7 @@ const extractJSONFromMarkdown = (markdown) => {
   return codeBlocks.length > 0 ? codeBlocks[0].text : null;
 };
 
-export const getAIResponse = async (userInput, profession) => {
+export const getAIResponse = async (userInput, profession, skillSections = []) => {
   try {
     if (!API_KEY) {
       throw new Error('API key is missing');
@@ -27,7 +27,7 @@ export const getAIResponse = async (userInput, profession) => {
           {
             parts: [
               {
-                text: getAIPrompt(userInput, profession)
+                text: getAIPrompt(userInput, profession, skillSections)
               }
             ]
           }

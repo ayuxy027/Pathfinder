@@ -1,4 +1,4 @@
-const getAIPrompt = (userInput, profession, options = { logErrors: false }) => {
+const getAIPrompt = (userInput, profession, skillSections = [], options = { logErrors: false }) => {
     // Helper: Validate input as non-empty strings
     const isValidString = (str) =>
       typeof str === 'string' && str.trim().length > 0;
@@ -19,6 +19,15 @@ const getAIPrompt = (userInput, profession, options = { logErrors: false }) => {
     // Sanitize inputs
     const sanitizedUserInput = sanitizeInput(userInput);
     const sanitizedProfession = sanitizeInput(profession);
+    
+    // Format skill sections for inclusion in the prompt
+    let skillSectionsText = '';
+    if (skillSections && skillSections.length > 0) {
+      skillSectionsText = `
+Focus particularly on these skill categories the user is interested in:
+${skillSections.map(skill => `- ${skill}`).join('\n')}
+`;
+    }
   
     // Template
     const prompt = `
@@ -26,6 +35,7 @@ const getAIPrompt = (userInput, profession, options = { logErrors: false }) => {
   
   User's Profession: ${sanitizedProfession}
   User's Request: ${sanitizedUserInput}
+  ${skillSectionsText}
   
   Generate a response in the following JSON structure:
   
@@ -60,7 +70,8 @@ const getAIPrompt = (userInput, profession, options = { logErrors: false }) => {
   Guidelines:
   1. Provide at least 4 detailed stages in the roadmap, each with 5-7 specific skills and 3-5 highly relevant resources.
   2. Ensure each stage builds upon the previous one, creating a clear progression path.
-  3. Include a mix of technical skills, soft skills, and industry knowledge in each stage.
+  3. Include a mix of technical skills, soft skills, and industry knowledge in each stage.${skillSections && skillSections.length > 0 ? `
+  4. Make sure to include all the requested skill categories (${skillSections.join(', ')}) across the roadmap stages where relevant.` : ''}
   4. Recommend up-to-date, high-quality resources from reputable sources.
   5. Create at least 8 flashcards covering key concepts, terminology, and best practices in the profession.
   6. Tailor the roadmap and flashcards to the user's specific request and profession.
