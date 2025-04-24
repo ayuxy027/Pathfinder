@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Loader2, 
@@ -16,6 +14,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { generateQuizQuestions, generateMockQuestions } from '../services/quizService';
+import CodeBlock from '../components/CodeBlock';
 
 const QUIZ_TOPICS = [
   { id: 'html', name: 'HTML', icon: '📄' },
@@ -302,15 +301,12 @@ const Quiz = () => {
                   </h3>
 
                   {questions[currentQuestionIndex].code && (
-                    <div className="overflow-hidden mb-5 rounded-lg">
-                      <SyntaxHighlighter 
-                        language={topic === 'javascript' ? 'javascript' : topic === 'html' ? 'html' : topic} 
-                        style={dracula}
+                    <div className="mb-5 rounded-lg overflow-hidden">
+                      <CodeBlock 
+                        code={questions[currentQuestionIndex].code}
+                        language={topic === 'javascript' ? 'javascript' : topic === 'html' ? 'html' : topic}
                         showLineNumbers={true}
-                        className="text-sm"
-                      >
-                        {questions[currentQuestionIndex].code}
-                      </SyntaxHighlighter>
+                      />
                     </div>
                   )}
 
