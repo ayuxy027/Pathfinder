@@ -50,7 +50,7 @@ const ChatBot = () => {
   }, [isOpen, showWelcomeMessage, setShowWelcomeMessage])
 
   return (
-    <div className="fixed z-50 bottom-4 right-4">
+    <div className="fixed right-4 bottom-4 z-50">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -64,19 +64,19 @@ const ChatBot = () => {
             }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.5, type: "spring", stiffness: 300, damping: 30 }}
-            className="flex flex-col overflow-hidden bg-white shadow-2xl rounded-3xl"
+            className="flex overflow-hidden flex-col bg-white rounded-3xl shadow-2xl"
             style={{
               boxShadow: '0 10px 25px -5px rgba(79, 70, 229, 0.5), 0 8px 10px -6px rgba(79, 70, 229, 0.3)',
             }}
           >
             <motion.div
-              className="flex items-center justify-between p-4 text-white cursor-move md:p-6 bg-gradient-to-r from-teal-500 to-teal-600 rounded-t-3xl"
+              className="flex justify-between items-center p-4 text-white bg-gradient-to-r from-teal-500 to-teal-600 rounded-t-3xl cursor-move md:p-6"
               whileHover={{ backgroundImage: 'linear-gradient(to right, #6366F1, #7C3AED)' }}
               transition={{ duration: 0.3 }}
             >
               <div className="flex items-center space-x-3">
                 <motion.div 
-                  className="flex items-center justify-center w-10 h-10 text-lg font-bold text-indigo-600 bg-white rounded-full shadow-inner md:w-12 md:h-12"
+                  className="flex justify-center items-center w-10 h-10 text-lg font-bold text-indigo-600 bg-white rounded-full shadow-inner md:w-12 md:h-12"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -139,7 +139,7 @@ const ChatBot = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(true)}
-          className="p-4 text-white transition-all rounded-full shadow-lg bg-proj hover:shadow-xl"
+          className="p-4 text-white rounded-full shadow-lg transition-all bg-proj hover:shadow-xl"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
