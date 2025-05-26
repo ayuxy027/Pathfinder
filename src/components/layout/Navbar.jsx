@@ -48,7 +48,7 @@ export default function Navbar() {
       <div className="h-20"></div>
       <motion.nav
         className={`fixed top-0 left-0 right-0 z-50 font-body transition-colors duration-300 ease-in-out 
-          ${isScrolled ? 'shadow-md backdrop-blur-sm bg-teal-800/90' : 'bg-teal-700'}
+          ${isScrolled ? 'shadow-lg backdrop-blur-sm bg-teal-700/95' : 'bg-teal-700'}
         `}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -79,7 +79,7 @@ function Logo() {
         whileTap={{ scale: 0.95 }}
       >
         <motion.h1 
-          className="text-xl font-bold text-white sm:text-2xl lg:text-3xl"
+          className="text-xl font-medium text-white sm:text-2xl lg:text-3xl"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -116,8 +116,8 @@ function DesktopNav({ location, showServicesDropdown, toggleServicesDropdown }) 
 function NavItem({ to, text, icon, index, isActive }) {
   return (
     <motion.div
-      className={`px-3 py-2 text-sm font-medium rounded-md ${
-        isActive ? 'text-yellow-400' : 'text-white hover:text-yellow-300'
+      className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+        isActive ? 'text-amber-400 bg-teal-600' : 'text-white hover:text-amber-300 hover:bg-teal-600'
       }`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -137,7 +137,7 @@ function ServicesDropdown({ showServicesDropdown, toggleServicesDropdown, locati
   return (
     <div className="relative group">
       <motion.button
-        className="flex items-center px-3 py-2 text-sm font-medium text-white rounded-md hover:text-yellow-300"
+        className="flex items-center px-3 py-2 text-sm font-medium text-white rounded-md hover:text-amber-300 hover:bg-teal-600 transition-colors duration-200"
         onClick={toggleServicesDropdown}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -149,7 +149,7 @@ function ServicesDropdown({ showServicesDropdown, toggleServicesDropdown, locati
       <AnimatePresence>
         {showServicesDropdown && (
           <motion.div
-            className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg"
+            className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -159,22 +159,22 @@ function ServicesDropdown({ showServicesDropdown, toggleServicesDropdown, locati
               <Link
                 key={item.name}
                 to={item.link}
-                className={`flex items-center px-4 py-2 text-sm ${
-                  location.pathname === item.link ? 'text-teal-600 bg-gray-100' : 'text-gray-700 hover:bg-gray-100 hover:text-teal-600'
+                className={`flex items-center px-4 py-3 text-sm transition-colors duration-200 ${
+                  location.pathname === item.link ? 'text-teal-600 bg-teal-50' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-600'
                 }`}
               >
                 {item.icon}
                 <span className="ml-2">{item.name}</span>
               </Link>
             ))}
-            <div className="px-4 py-2 text-sm font-medium text-gray-700">External Resources</div>
+            <div className="px-4 py-2 text-sm font-medium text-gray-500 border-t border-gray-200">External Resources</div>
             {externalResources.map((resource) => (
               <a
                 key={resource.name}
                 href={resource.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-teal-600"
+                className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-600 transition-colors duration-200"
               >
                 <span className="mr-2">{resource.icon}</span>
                 {resource.name}
@@ -192,7 +192,7 @@ function MobileMenuToggle({ isOpen, toggleMenu }) {
     <motion.button
       onClick={toggleMenu}
       type="button"
-      className="inline-flex justify-center items-center p-2 ml-4 rounded-md sm:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500"
+      className="inline-flex justify-center items-center p-2 ml-4 rounded-md sm:hidden hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-400"
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
     >
@@ -207,7 +207,7 @@ function MobileMenu({ isOpen, location }) {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="backdrop-blur-sm sm:hidden bg-teal-800/95"
+          className="backdrop-blur-sm sm:hidden bg-teal-700/95"
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: 'auto', opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
@@ -232,15 +232,15 @@ function MobileMenu({ isOpen, location }) {
                 isActive={location.pathname === item.link}
               />
             ))}
-            <div className="pt-4 mt-4 border-t border-white/10">
-              <p className="px-3 text-sm font-medium text-white">External Resources</p>
+            <div className="pt-4 mt-4 border-t border-teal-600">
+              <p className="px-3 text-sm font-medium text-teal-200">External Resources</p>
               {externalResources.map((resource) => (
                 <a
                   key={resource.name}
                   href={resource.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center px-3 py-2 text-sm text-white hover:bg-white/10"
+                  className="flex items-center px-3 py-2 text-sm text-white hover:bg-teal-600 transition-colors duration-200"
                 >
                   <span className="mr-2">{resource.icon}</span>
                   {resource.name}
@@ -258,13 +258,13 @@ function MobileNavItem({ to, text, icon, isActive }) {
   return (
     <motion.div
       className="block overflow-hidden rounded-md"
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
     >
       <Link to={to} className="block">
         <motion.div 
-          className={`px-3 py-2 text-sm font-medium transition-all duration-300 ease-in-out ${
-            isActive ? 'text-yellow-600 bg-blue-200' : 'text-white hover:bg-blue-200'
+          className={`px-3 py-2 text-sm font-medium transition-all duration-200 ${
+            isActive ? 'text-amber-400 bg-teal-600' : 'text-white hover:bg-teal-600'
           }`}
           whileHover={{ x: 5 }}
           transition={{ duration: 0.2 }}

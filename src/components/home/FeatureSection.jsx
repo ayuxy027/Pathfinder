@@ -33,16 +33,24 @@ const FeatureSection = () => {
   ];
 
   return (
-    <section ref={ref} className="py-20 bg-gradient-to-b from-white to-blue-50">
-      <div className="container px-6 mx-auto space-y-16">
-        <motion.h2
+    <section ref={ref} className="py-16 bg-gradient-to-br from-white to-teal-50 sm:py-20 lg:py-24">
+      <div className="relative px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-3xl font-bold leading-snug text-center text-gray-800 mb-14 md:text-4xl"
+          className="mb-12 text-center sm:mb-16 lg:mb-20"
         >
-          How <span className="text-transparent text-semibold bg-proj bg-clip-text">PathFinder</span> works
-        </motion.h2>
+          <h2 className="mb-4 text-3xl font-medium leading-tight text-gray-800 sm:text-4xl lg:text-5xl">
+            How{' '}
+            <span className="font-medium text-teal-600">PathFinder</span>{' '}
+            works
+          </h2>
+          <p className="mx-auto max-w-2xl text-lg text-gray-600">
+            Discover your perfect career path through our comprehensive approach
+          </p>
+        </motion.div>
+        
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 sm:gap-8">
           {features.map((feature, index) => (
             <FeatureCard key={index} feature={feature} index={index} />
@@ -59,19 +67,19 @@ const FeatureCard = ({ feature, index }) => {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay: index * 0.1 }}
-      className="relative p-6 overflow-hidden transition-all duration-300 bg-white shadow-lg sm:p-8 rounded-xl hover:shadow-xl"
+      className="overflow-hidden relative p-6 bg-white rounded-xl shadow-lg transition-all duration-300 sm:p-8 hover:shadow-xl group"
     >
-      <div className="absolute top-0 right-0 w-24 h-24 transform translate-x-8 -translate-y-8 rounded-full bg-proj opacity-10"></div>
+      <div className="absolute top-0 right-0 w-24 h-24 bg-teal-100 rounded-full opacity-50 transform translate-x-8 -translate-y-8"></div>
       <motion.div
         whileHover={{ scale: 1.05, rotate: 5 }}
-        className="relative z-10 flex items-center justify-center w-16 h-16 mb-6 text-white rounded-xl bg-proj"
+        className="flex relative z-10 justify-center items-center mb-6 w-16 h-16 text-white bg-teal-600 rounded-xl transition-colors duration-300 group-hover:bg-teal-700"
       >
         <feature.icon className="text-2xl" />
       </motion.div>
-      <h3 className="mb-3 text-xl font-bold text-gray-800">{feature.title}</h3>
+      <h3 className="mb-3 text-xl font-medium text-gray-800">{feature.title}</h3>
       <p className="text-sm leading-relaxed text-gray-600">{feature.description}</p>
       <motion.div
-        className="absolute bottom-0 right-0 w-20 h-20 transform translate-x-6 translate-y-6 rounded-full bg-proj opacity-10"
+        className="absolute right-0 bottom-0 w-20 h-20 bg-teal-100 rounded-full opacity-30 transform translate-x-6 translate-y-6"
         animate={{ scale: [1, 1.1, 1] }}
         transition={{ duration: 5, repeat: Infinity }}
       ></motion.div>

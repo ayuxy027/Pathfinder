@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Loader2, FileText, BookOpen, Link as LinkIcon, Code, Users, 
   Lightbulb, ChevronRight, Download, Save, Plus, X, Edit,
-  Clipboard, CheckCircle, HelpCircle, PanelLeftOpen, Tag 
+  Clipboard, CheckCircle, HelpCircle, PanelLeftOpen, Tag, Trash2
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -207,57 +207,66 @@ const Roadmap = () => {
 
   return (
     <motion.div 
-      className="container px-4 py-10 mx-auto max-w-5xl font-sans bg-stone-50"
+      className="container px-4 py-10 mx-auto max-w-5xl font-sans bg-gradient-to-br from-stone-50 to-white min-h-screen"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
       <motion.h1 
-        className="mb-8 text-3xl font-bold tracking-tight text-center text-transparent bg-clip-text bg-gradient-to-r from-teal-700 to-teal-500 sm:text-4xl"
+        className="mb-8 text-3xl font-bold tracking-tight text-center text-transparent bg-clip-text bg-gradient-to-r from-teal-700 to-teal-500 sm:text-4xl lg:text-5xl"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1, type: 'spring', stiffness: 80 }}
       >
         Career Roadmap Generator
+        <span className="block mt-2 text-base font-medium text-gray-600 sm:text-lg">
+          Create your personalized path to success
+        </span>
       </motion.h1>
       
-      {/* Saved Roadmaps Section */}
+      {/* Saved Roadmaps Section with enhanced styling */}
       {savedRoadmaps.length > 0 && (
         <motion.div 
-          className="p-4 mb-6 bg-white rounded-lg border shadow-sm border-stone-100"
+          className="p-6 mb-8 bg-white rounded-xl border shadow-md border-stone-200/70 backdrop-blur-sm"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <details>
-            <summary className="flex items-center text-sm font-medium text-teal-700 cursor-pointer">
+            <summary className="flex items-center text-sm font-medium text-teal-700 cursor-pointer hover:text-teal-600">
               <PanelLeftOpen className="mr-2 w-4 h-4" />
               Your Saved Roadmaps ({savedRoadmaps.length})
             </summary>
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 space-y-3">
               {savedRoadmaps.map(roadmap => (
-                <div key={roadmap.id} className="flex justify-between items-center p-3 rounded-md border border-stone-200">
+                <motion.div 
+                  key={roadmap.id} 
+                  className="flex justify-between items-center p-4 rounded-lg border border-stone-200/70 bg-stone-50/50 hover:bg-stone-50 transition-all duration-200"
+                  whileHover={{ scale: 1.01 }}
+                >
                   <div>
-                    <div className="text-sm font-medium">{roadmap.profession}</div>
+                    <div className="text-sm font-medium text-gray-800">{roadmap.profession}</div>
                     <div className="text-xs text-stone-500">{roadmap.goal}</div>
                     <div className="text-xs text-stone-400">Saved on {roadmap.date}</div>
                   </div>
                   <div className="flex space-x-2">
-                    <button 
+                    <motion.button 
                       onClick={() => loadRoadmap(roadmap)}
-                      className="p-1 text-teal-600 rounded-full transition-colors hover:bg-teal-50"
+                      className="p-2 text-teal-600 rounded-lg transition-colors hover:bg-teal-50"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      <FileText size={14} />
-                    </button>
-                    <button 
+                      <FileText size={16} />
+                    </motion.button>
+                    <motion.button 
                       onClick={() => deleteSavedRoadmap(roadmap.id)}
-                      className="p-1 text-rose-500 rounded-full transition-colors hover:bg-rose-50"
+                      className="p-2 text-rose-500 rounded-lg transition-colors hover:bg-rose-50"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                      </svg>
-                    </button>
+                      <Trash2 size={16} />
+                    </motion.button>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </details>
@@ -266,7 +275,7 @@ const Roadmap = () => {
       
       <motion.form 
         onSubmit={handleSubmit} 
-        className="p-6 mb-12 space-y-5 bg-white rounded-xl border shadow-sm border-stone-100"
+        className="p-8 mb-12 space-y-6 bg-white rounded-xl border shadow-md border-stone-200/70 backdrop-blur-sm"
         initial={{ scale: 0.98, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.3 }}
@@ -463,7 +472,7 @@ const Roadmap = () => {
       <AnimatePresence>
         {error && (
           <motion.div 
-            className="p-3 mb-6 text-sm text-red-800 bg-red-50 rounded-md border-red-400 shadow-sm border-l-3"
+            className="p-4 mb-8 text-sm text-red-800 bg-red-50 rounded-lg border-red-200 shadow-sm border-l-4"
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}

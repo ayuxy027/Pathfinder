@@ -170,10 +170,10 @@ const Progress = () => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-stone-50">
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50">
         <div className="flex flex-col items-center space-y-4">
           <Loader2 className="w-12 h-12 text-teal-600 animate-spin" />
-          <p className="text-lg font-medium text-stone-700">Loading your progress...</p>
+          <p className="text-lg font-medium text-gray-700">Loading your progress...</p>
         </div>
       </div>
     );
@@ -182,17 +182,19 @@ const Progress = () => {
   // Error state
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-stone-50">
-        <div className="p-6 max-w-md text-center bg-white rounded-xl shadow-md">
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50">
+        <div className="p-8 max-w-md text-center bg-white rounded-xl shadow-xl border border-stone-200/70 backdrop-blur-sm">
           <div className="mx-auto mb-4 w-16 h-16 text-red-500">⚠️</div>
-          <h2 className="mb-2 text-xl font-semibold text-stone-800">Something went wrong</h2>
-          <p className="mb-4 text-stone-600">{error}</p>
-          <button 
+          <h2 className="mb-2 text-xl font-semibold text-gray-800">Something went wrong</h2>
+          <p className="mb-6 text-gray-600">{error}</p>
+          <motion.button 
             onClick={() => window.location.reload()} 
-            className="px-4 py-2 font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700"
+            className="px-6 py-3 font-medium text-white bg-gradient-to-r from-teal-600 to-teal-500 rounded-lg shadow-md hover:from-teal-700 hover:to-teal-600 hover:shadow-lg transition-all duration-200"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             Try Again
-          </button>
+          </motion.button>
         </div>
       </div>
     );
@@ -201,21 +203,25 @@ const Progress = () => {
   // Not authenticated state
   if (!authLoading && !isAuthenticated) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-stone-50">
-        <div className="p-8 max-w-md text-center bg-white rounded-2xl shadow-xl">
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50">
+        <div className="p-8 max-w-md text-center bg-white rounded-xl shadow-xl border border-stone-200/70 backdrop-blur-sm">
           <Users className="mx-auto mb-6 w-16 h-16 text-teal-500" />
-          <h1 className="mb-4 text-2xl font-bold text-stone-800">Track Your Learning Journey</h1>
-          <p className="mb-6 text-stone-600">Sign in to access personalized progress tracking, achievements, and learning insights.</p>
-          <button className="px-6 py-3 font-medium text-white bg-gradient-to-r from-teal-500 to-teal-600 rounded-lg shadow-lg transition-all hover:from-teal-600 hover:to-teal-700">
+          <h1 className="mb-4 text-2xl font-bold text-gray-800">Track Your Learning Journey</h1>
+          <p className="mb-6 text-gray-600">Sign in to access personalized progress tracking, achievements, and learning insights.</p>
+          <motion.button 
+            className="px-6 py-3 font-medium text-white bg-gradient-to-r from-teal-600 to-teal-500 rounded-lg shadow-md hover:from-teal-700 hover:to-teal-600 hover:shadow-lg transition-all duration-200"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
             Sign in to continue
-          </button>
+          </motion.button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50">
       <div className="container px-4 py-10 mx-auto max-w-7xl">
         {/* Header */}
         <motion.div 
@@ -224,17 +230,17 @@ const Progress = () => {
           transition={{ duration: 0.5 }}
           className="mb-10 text-center"
         >
-          <h1 className="mb-2 text-3xl font-bold tracking-tight md:text-4xl">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-teal-500">
+          <h1 className="mb-3 text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-700 to-teal-500">
               Your Learning Dashboard
             </span>
           </h1>
-          <p className="text-stone-500">
+          <p className="text-gray-600 md:text-lg">
             Track your progress, achievements, and growth in your developer journey
           </p>
         </motion.div>
 
-        {/* Stats Overview */}
+        {/* Stats Overview with enhanced styling */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -252,18 +258,19 @@ const Progress = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 + index * 0.1 }}
-              className="overflow-hidden relative p-4 bg-white rounded-xl border shadow-sm border-stone-100"
+              className="overflow-hidden relative p-6 bg-white rounded-xl border shadow-md border-stone-200/70 backdrop-blur-sm hover:shadow-lg transition-all duration-200"
+              whileHover={{ scale: 1.02 }}
             >
               <div className="flex flex-col h-full">
-                <div className="mb-2 text-2xl">{stat.icon}</div>
-                <p className="mb-1 text-sm font-medium text-stone-500">{stat.label}</p>
-                <p className="text-2xl font-bold text-stone-800">{stat.value}</p>
+                <div className="mb-3 text-2xl">{stat.icon}</div>
+                <p className="mb-1 text-sm font-medium text-gray-500">{stat.label}</p>
+                <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
               </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Main Content Grid */}
+        {/* Main Content Grid with enhanced styling */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Left Column */}
           <motion.div 
@@ -273,7 +280,7 @@ const Progress = () => {
             className="space-y-6 lg:col-span-2"
           >
             {/* Chart Section */}
-            <div className="p-6 bg-white rounded-xl border shadow-sm border-stone-100">
+            <div className="p-6 bg-white rounded-xl border shadow-md border-stone-200/70 backdrop-blur-sm">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-stone-800">Learning Analytics</h2>
                 <div className="flex space-x-2">
@@ -336,7 +343,7 @@ const Progress = () => {
             </div>
 
             {/* Achievements Section */}
-            <div className="p-6 bg-white rounded-xl border shadow-sm border-stone-100">
+            <div className="p-6 bg-white rounded-xl border shadow-md border-stone-200/70 backdrop-blur-sm">
               <h2 className="flex items-center mb-6 text-xl font-bold text-stone-800">
                 <Award className="mr-2 text-teal-500" />
                 Recent Achievements
@@ -375,7 +382,7 @@ const Progress = () => {
             className="space-y-6"
           >
             {/* Learning Streak */}
-            <div className="p-6 bg-white rounded-xl border shadow-sm border-stone-100">
+            <div className="p-6 bg-white rounded-xl border shadow-md border-stone-200/70 backdrop-blur-sm">
               <h2 className="flex items-center mb-5 text-xl font-bold text-stone-800">
                 <Calendar className="mr-2 text-teal-500" />
                 Learning Streaks
@@ -420,7 +427,7 @@ const Progress = () => {
             </div>
             
             {/* Learning Insights */}
-            <div className="p-6 bg-white rounded-xl border shadow-sm border-stone-100">
+            <div className="p-6 bg-white rounded-xl border shadow-md border-stone-200/70 backdrop-blur-sm">
               <h2 className="flex items-center mb-5 text-xl font-bold text-stone-800">
                 <Lightbulb className="mr-2 text-teal-500" />
                 Learning Insights
@@ -448,7 +455,7 @@ const Progress = () => {
             </div>
             
             {/* Suggested Learning Paths */}
-            <div className="p-6 bg-white rounded-xl border shadow-sm border-stone-100">
+            <div className="p-6 bg-white rounded-xl border shadow-md border-stone-200/70 backdrop-blur-sm">
               <h2 className="mb-4 text-lg font-bold text-stone-800">Recommended Next Steps</h2>
               <div className="space-y-3">
                 {[

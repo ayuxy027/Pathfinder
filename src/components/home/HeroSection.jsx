@@ -1,9 +1,36 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ChevronRight, GraduationCap, Target, Users, Sparkles, MessageSquare, FileText, Map, Brain, Briefcase, Award, Flag, Star, Settings, Heart, Code, Coffee } from 'lucide-react';
 
-const dynamicWords = ["AI-Powered", "Personalized", "Future-Ready"];
+// Add CSS animations for infinite scroll
+const scrollAnimations = `
+  @keyframes scroll-up {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(-50%);
+    }
+  }
+  
+  @keyframes scroll-down {
+    0% {
+      transform: translateY(-50%);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-scroll-up {
+    animation: scroll-up 30s linear infinite;
+  }
+  
+  .animate-scroll-down {
+    animation: scroll-down 30s linear infinite;
+  }
+`;
 
 const cardDataLeft = [
   { icon: GraduationCap, title: "Learn", description: "Custom path", color: "#0D9488" },
@@ -45,54 +72,26 @@ const cardVariants = {
   }),
 };
 
-const MarqueeColumn = React.memo(({ cards, isLeft, containerRef }) => {
-  const scrollerRef = useRef(null);
-  const sentinel = useRef(null);
-
-  useEffect(() => {
-    if (!scrollerRef.current || !sentinel.current) return;
-
-    const scroller = scrollerRef.current;
-    const scrollHeight = scroller.offsetHeight;
-    const container = containerRef.current;
-
-    const resetPosition = () => {
-      if (!container) return;
-      const scrollTop = container.scrollTop;
-      const maxScroll = scrollHeight / 2;
-      
-      if (scrollTop >= maxScroll) {
-        container.scrollTop = 0;
-      } else if (scrollTop <= 0) {
-        container.scrollTop = maxScroll;
-      }
-    };
-
-    // Initial scroll position
-    container.scrollTop = scrollHeight / 4;
-
-    const animate = () => {
-      if (!container) return;
-      container.scrollTop += isLeft ? 1 : -1;
-      resetPosition();
-      requestRef.current = requestAnimationFrame(animate);
-    };
-
-    const requestRef = { current: requestAnimationFrame(animate) };
-
-    return () => {
-      if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current);
-      }
-    };
-  }, [isLeft, containerRef]);
-
+const MarqueeColumn = React.memo(({ cards, isLeft }) => {
   return (
-    <div ref={scrollerRef} className="flex flex-col gap-6 py-6">
-      {[...cards, ...cards, ...cards].map((card, index) => (
-        <Card key={`${index}-${card.title}`} card={card} index={index % cards.length} isLeft={isLeft} />
-      ))}
-      <div ref={sentinel} className="h-px" />
+    <div className="overflow-hidden relative h-full">
+      <div 
+        className={`flex flex-col gap-6 py-6 ${isLeft ? 'animate-scroll-up' : 'animate-scroll-down'}`}
+        style={{
+          animationDuration: '30s',
+          animationTimingFunction: 'linear',
+          animationIterationCount: 'infinite',
+        }}
+      >
+        {/* First set of cards */}
+        {cards.map((card, index) => (
+          <Card key={`first-${index}-${card.title}`} card={card} index={index} isLeft={isLeft} />
+        ))}
+        {/* Duplicate set for seamless loop */}
+        {cards.map((card, index) => (
+          <Card key={`second-${index}-${card.title}`} card={card} index={index} isLeft={isLeft} />
+        ))}
+      </div>
     </div>
   );
 });
@@ -129,7 +128,7 @@ const Card = React.memo(({ card, index, isLeft }) => {
             <Icon className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-gray-800">{card.title}</h3>
+            <h3 className="text-base font-medium text-gray-800">{card.title}</h3>
             <p className="text-sm text-gray-600">{card.description}</p>
           </div>
         </div>
@@ -139,55 +138,33 @@ const Card = React.memo(({ card, index, isLeft }) => {
 });
 
 function HeroSection() {
-  const [dynamicText, setDynamicText] = useState('');
-  const [wordIndex, setWordIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const leftColumnRef = useRef(null);
-  const rightColumnRef = useRef(null);
-
+  // Inject CSS animations
   useEffect(() => {
-    const typeWriter = () => {
-      const currentWord = dynamicWords[wordIndex];
-      const shouldDelete = isDeleting && dynamicText === '';
-      const shouldChangeWord = !isDeleting && dynamicText === currentWord;
+    const styleElement = document.createElement('style');
+    styleElement.textContent = scrollAnimations;
+    document.head.appendChild(styleElement);
 
-      if (shouldDelete) {
-        setIsDeleting(false);
-        setWordIndex((prevIndex) => (prevIndex + 1) % dynamicWords.length);
-      } else if (shouldChangeWord) {
-        setIsDeleting(true);
-      } else {
-        setDynamicText(prevText =>
-          isDeleting ? currentWord.slice(0, prevText.length - 1) : currentWord.slice(0, prevText.length + 1)
-        );
-      }
+    return () => {
+      document.head.removeChild(styleElement);
     };
-
-    const timer = setTimeout(typeWriter, isDeleting ? 100 : 150);
-    return () => clearTimeout(timer);
-  }, [dynamicText, isDeleting, wordIndex]);
+  }, []);
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-white to-teal-50">
+    <section className="overflow-hidden relative bg-gradient-to-br from-white to-teal-50">
       <BackgroundEffects />
       <div className="relative px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div className="grid items-center grid-cols-1 gap-12 py-12 md:grid-cols-2">
-          <LeftContent dynamicText={dynamicText} />
-          <div className="relative grid grid-cols-2 gap-8 h-[700px]">
-            <div ref={leftColumnRef} className="relative h-full overflow-hidden">
-              <MarqueeColumn 
-                cards={cardDataLeft} 
-                isLeft={true}
-                containerRef={leftColumnRef}
-              />
-            </div>
-            <div ref={rightColumnRef} className="relative h-full overflow-hidden">
-              <MarqueeColumn 
-                cards={cardDataRight} 
-                isLeft={false}
-                containerRef={rightColumnRef}
-              />
-            </div>
+        <div className="grid grid-cols-1 gap-12 items-center py-12 lg:grid-cols-2">
+          <LeftContent />
+          {/* Hide carousels on small/medium screens, show only on large screens */}
+          <div className="relative hidden lg:grid grid-cols-2 gap-8 h-[700px]">
+            <MarqueeColumn 
+              cards={cardDataLeft} 
+              isLeft={true}
+            />
+            <MarqueeColumn 
+              cards={cardDataRight} 
+              isLeft={false}
+            />
           </div>
         </div>
       </div>
@@ -220,7 +197,7 @@ function BackgroundEffects() {
   );
 }
 
-function LeftContent({ dynamicText }) {
+function LeftContent() {
   const contentRef = useRef(null);
 
   useEffect(() => {
@@ -239,13 +216,10 @@ function LeftContent({ dynamicText }) {
 
   return (
     <div ref={contentRef} className="relative z-10">
-      <h1 className="text-4xl font-bold leading-tight lg:text-5xl xl:text-6xl">
+      <h1 className="text-4xl font-medium leading-tight lg:text-5xl xl:text-6xl">
         <span className="text-teal-600">Navigate Your Career</span>
         <br />
-        <span className="text-amber-400">
-          {dynamicText}
-          <span className="animate-blink">|</span>
-        </span>
+        <span className="text-amber-400">AI Powered</span>
         <br />
         <span className="text-teal-600">Today!</span>
       </h1>
@@ -255,9 +229,9 @@ function LeftContent({ dynamicText }) {
       </p>
 
       <div className="mt-8 sm:mt-10">
-        <button className="flex items-center px-8 py-3 text-base font-semibold text-white transition-all transform bg-teal-600 rounded-full sm:text-lg hover:bg-teal-700 hover:scale-105 group">
+        <button className="flex items-center px-8 py-3 text-base font-medium text-white bg-teal-600 rounded-full transition-all transform sm:text-lg hover:bg-teal-700 hover:scale-105 group">
           Get Started
-          <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+          <ChevronRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
         </button>
       </div>
     </div>

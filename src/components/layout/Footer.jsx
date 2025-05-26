@@ -47,25 +47,26 @@ const Meteor = ({ size, duration, delay }) => (
     style={{
       width: size,
       height: size,
-      boxShadow: `0 0 ${size * 2}px ${size / 2}px rgba(255,255,255,0.5)`,
+      boxShadow: `0 0 ${size * 2}px ${size / 2}px rgba(255,255,255,0.3)`,
     }}
     initial={{ top: '-5%', left: '105%' }}
     animate={{
       top: '105%',
       left: '-5%',
-      transition: { duration, delay, repeat: Infinity, repeatDelay: 3 },
+      transition: { duration, delay, repeat: Infinity, repeatDelay: 4 },
     }}
   />
 );
 
 const Star = ({ top, left, size }) => (
   <div
-    className="absolute bg-white rounded-full animate-twinkle"
+    className="absolute bg-white rounded-full animate-pulse"
     style={{
       top: `${top}%`,
       left: `${left}%`,
       width: size,
       height: size,
+      opacity: Math.random() * 0.8 + 0.2,
     }}
   />
 );
@@ -73,9 +74,9 @@ const Star = ({ top, left, size }) => (
 const FooterLink = ({ href, children }) => (
   <motion.a
     href={href}
-    className="inline-block text-lg transition-colors duration-300 hover:text-blue-300"
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
+    className="inline-block text-base transition-colors duration-300 hover:text-amber-300"
+    whileHover={{ scale: 1.02, x: 5 }}
+    whileTap={{ scale: 0.98 }}
   >
     {children}
   </motion.a>
@@ -83,54 +84,71 @@ const FooterLink = ({ href, children }) => (
 
 export default function Footer() {
   return (
-    <footer className="relative py-16 overflow-hidden text-white bg-proj">
+    <footer className="relative py-16 sm:py-20 overflow-hidden text-white bg-gradient-to-br from-teal-800 to-teal-900">
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(50)].map((_, i) => (
+        {[...Array(30)].map((_, i) => (
           <Star key={i} top={Math.random() * 100} left={Math.random() * 100} size={Math.random() * 2 + 1} />
         ))}
       </div>
-      <Meteor size={2} duration={2} delay={0} />
-      <Meteor size={1} duration={1.5} delay={1} />
-      <Meteor size={3} duration={2.5} delay={2} />
-      <div className="container relative z-10 px-4 mx-auto">
-        <div className="grid gap-12 mb-16 md:grid-cols-2 lg:grid-cols-4">
+      <Meteor size={2} duration={3} delay={0} />
+      <Meteor size={1.5} duration={2.5} delay={1.5} />
+      <Meteor size={2.5} duration={3.5} delay={3} />
+      
+      <div className="relative z-10 px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="grid gap-8 mb-12 sm:gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {footerLinks.map((column, index) => (
-            <div key={index} className="space-y-6">
-              <h3 className="text-2xl font-bold">{column.title}</h3>
-              <ul className="space-y-4">
+            <motion.div 
+              key={index} 
+              className="space-y-4 sm:space-y-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <h3 className="text-xl sm:text-2xl font-medium text-amber-400">{column.title}</h3>
+              <ul className="space-y-2 sm:space-y-3">
                 {column.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
                     <FooterLink href={link.href}>{link.label}</FooterLink>
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           ))}
-          <div className="space-y-6">
-            <h3 className="text-2xl font-bold">Connect</h3>
-            <div className="flex flex-wrap gap-4">
+          <motion.div 
+            className="space-y-4 sm:space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <h3 className="text-xl sm:text-2xl font-medium text-amber-400">Connect</h3>
+            <div className="flex flex-wrap gap-3 sm:gap-4">
               {socialIcons.map(({ Icon, href, label }) => (
                 <motion.a
                   key={label}
                   href={href}
-                  className="p-3 text-2xl transition-colors duration-300 rounded-full hover:bg-white hover:text-blue-600"
+                  className="p-3 text-xl sm:text-2xl transition-all duration-300 rounded-full hover:bg-teal-700 hover:text-amber-300 border border-teal-600 hover:border-amber-300"
                   aria-label={label}
-                  whileHover={{ scale: 1.1 }}
+                  whileHover={{ scale: 1.1, rotate: 5 }}
                   whileTap={{ scale: 0.9 }}
                 >
                   <Icon />
                 </motion.a>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
+        
         <motion.div
-          className="pt-8 text-center border-t border-blue-400"
+          className="pt-6 sm:pt-8 text-center border-t border-teal-700"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <p className="text-lg">&copy; 2024 PathFinder. All rights reserved.</p>
+          <p className="text-base sm:text-lg text-teal-200">
+            &copy; 2024{' '}
+            <span className="text-amber-400 font-medium">PathFinder</span>
+            . All rights reserved.
+          </p>
         </motion.div>
       </div>
     </footer>

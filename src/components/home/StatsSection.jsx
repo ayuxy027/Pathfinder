@@ -32,20 +32,27 @@ const StatsSection = () => {
   ];
 
   return (
-    <section ref={ref} className="py-20 bg-gray-50"> {/* Increased vertical padding */}
-      <div className="container px-6 mx-auto space-y-16"> {/* Added spacing between sections */}
+    <section ref={ref} className="py-16 bg-gradient-to-br from-teal-50 to-white sm:py-20 lg:py-24">
+      <div className="relative px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         
-        {/* Heading with additional bottom margin */}
-        <motion.h2
+        {/* Heading */}
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-3xl font-bold leading-snug text-center text-gray-800 mb-14 md:text-4xl"
+          className="mb-12 text-center sm:mb-16 lg:mb-20"
         >
-          Folks who use <span className="text-transparent text-semibold bg-proj bg-clip-text">PathFinder</span> get hired at
-        </motion.h2>
+          <h2 className="mb-4 text-3xl font-medium leading-tight text-gray-800 sm:text-4xl lg:text-5xl">
+            Folks who use{' '}
+            <span className="font-medium text-teal-600">PathFinder</span>{' '}
+            get hired at
+          </h2>
+          <p className="mx-auto max-w-2xl text-lg text-gray-600">
+            Join thousands of professionals who found their dream careers
+          </p>
+        </motion.div>
 
-        {/* Grid of Logos with increased spacing */}
+        {/* Grid of Logos */}
         <motion.div
           initial="hidden"
           animate={inView ? "visible" : "hidden"}
@@ -58,7 +65,7 @@ const StatsSection = () => {
               },
             },
           }}
-          className="grid items-center grid-cols-2 gap-10 md:grid-cols-5 md:gap-12" // Increased gaps between grid items
+          className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5 lg:gap-12"
         >
           {companyLogos.map((logo, index) => (
             <motion.div
@@ -74,12 +81,12 @@ const StatsSection = () => {
                   },
                 },
               }}
-              className="flex items-center justify-center p-4" // Added padding inside each grid item
+              className="flex justify-center items-center p-4 group"
             >
               <img
                 src={logo.src}
                 alt={`${logo.name} logo`}
-                className="max-w-[100px] md:max-w-[120px] h-auto opacity-70 transition-opacity duration-300 hover:opacity-100"
+                className="max-w-[80px] sm:max-w-[100px] lg:max-w-[120px] h-auto opacity-60 transition-all duration-300 group-hover:opacity-90 group-hover:scale-105 filter grayscale hover:grayscale-0"
               />
             </motion.div>
           ))}
