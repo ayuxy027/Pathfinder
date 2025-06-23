@@ -1,9 +1,15 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { ChatMessage } from '../types'
+
+interface UseLocalStorageReturn<T> {
+  0: T;
+  1: (value: T) => void;
+}
 
 // Internal useLocalStorage hook
-const useLocalStorage = (key, initialValue) => {
-  const [storedValue, setStoredValue] = useState(() => {
+const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: T) => void] => {
+  const [storedValue, setStoredValue] = useState<T>(() => {
     try {
       const item = window.localStorage.getItem(key)
       return item ? JSON.parse(item) : initialValue
@@ -22,16 +28,20 @@ const useLocalStorage = (key, initialValue) => {
   }, [key, storedValue])
 
   return [storedValue, setStoredValue]
+};
+
+interface PromptOptions {
+  logErrors?: boolean;
 }
 
 // Internal AI Prompt Generator
-const getAIPrompt = (userInput, options = { logErrors: false }) => {
+const getAIPrompt = (userInput: string, options: PromptOptions = { logErrors: false }): string => {
   // Helper: Validate input as a non-empty string
-  const isValidString = (str) =>
+  const isValidString = (str: any): str is string =>
     typeof str === 'string' && str.trim().length > 0;
 
   // Helper: Sanitize input to prevent code injections
-  const sanitizeInput = (input) =>
+  const sanitizeInput = (input: string): string =>
     input.replace(/[<>`"'{}]/g, '').trim();
 
   // Input Validation: Strict checks with specific error messages
@@ -180,7 +190,7 @@ ${sanitizedUserInput}
   return prompt;
 
   // Handle invalid inputs with logging (if enabled)
-  function handleInvalidInput(errorMessage) {
+  function handleInvalidInput(errorMessage: string): never {
     if (options.logErrors) {
       console.error(`[getAIPrompt Error] ${errorMessage}`);
     }
@@ -189,7 +199,7 @@ ${sanitizedUserInput}
 };
 
 // Internal AI Service (replaced axios with fetch)
-const getAIResponse = async (userInput) => {
+const getAIResponse = async (userInput: string): Promise<string> => {
   const API_KEY = import.meta.env.VITE_API_KEY;
   const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 
@@ -235,7 +245,7 @@ const useSpeechSynthesis = () => {
     }
   }, [])
 
-  const speak = ({ text }) => {
+  const speak = ({ text }: { text: string }): void => {
     if (!speechSynth) return
 
     // Cancel any ongoing speech
@@ -250,7 +260,7 @@ const useSpeechSynthesis = () => {
     speechSynth.speak(utterance)
   }
 
-  const cancel = () => {
+  const cancel = (): void => {
     if (speechSynth) {
       setSpeaking(false)
       speechSynth.cancel()
@@ -287,7 +297,7 @@ const useChatbot = () => {
     "Remote work opportunities",
   ]
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (): Promise<void> => {
     if (!input.trim()) return
 
     setIsLoading(true)
@@ -382,8 +392,12 @@ const useChatbot = () => {
 }
 
 // Internal Simple Markdown Renderer (lightweight replacement)
-const SimpleMarkdownRenderer = ({ content }) => {
-  const renderMarkdown = (text) => {
+interface MarkdownRendererProps {
+  content: string;
+}
+
+const SimpleMarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
+  const renderMarkdown = (text: string): string => {
     if (!text) return '';
     
     // Simple markdown parsing
@@ -417,7 +431,13 @@ const SimpleMarkdownRenderer = ({ content }) => {
 };
 
 // Internal Custom Toggle Switch (replacement for react-switch)
-const CustomToggle = ({ checked, onChange, disabled = false }) => {
+interface CustomToggleProps {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+}
+
+const CustomToggle: React.FC<CustomToggleProps> = ({ checked, onChange, disabled = false }) => {
   return (
     <button
       type="button"
@@ -769,7 +789,7 @@ const ChatInput = ({
 };
 
 // Main ChatBot Component (with framer-motion animations)
-const ChatBot = () => {
+const ChatBot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)

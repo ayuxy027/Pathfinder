@@ -96,9 +96,9 @@ const TestimonialRow = ({ testimonials, direction }) => {
       initial={{ x: direction === 'left' ? 0 : -960 }}
       animate={{ x: direction === 'left' ? [-960, -1920] : [0, -960] }}
       transition={{
-        x: { 
-          repeat: Infinity, 
-          duration: 30, 
+        x: {
+          repeat: Infinity,
+          duration: 30,
           ease: "linear",
           repeatType: "loop"
         },
@@ -120,27 +120,27 @@ const TestimonialCard = ({ testimonial }) => {
     >
       <div className="absolute top-0 left-0 w-20 h-20 -translate-x-10 -translate-y-10 bg-teal-100 rounded-full opacity-30"></div>
       <div className="absolute bottom-0 right-0 w-20 h-20 translate-x-10 translate-y-10 bg-amber-100 rounded-full opacity-30"></div>
-      
+
       <FaQuoteLeft className="mb-4 text-3xl text-teal-600" />
       <p className="mb-6 text-sm leading-relaxed text-gray-700 italic">{testimonial.content}</p>
-      
+
       <div className="flex items-center gap-4">
-        <img 
-          src={testimonial.image} 
-          alt={testimonial.name} 
-          className="object-cover w-12 h-12 rounded-full ring-2 ring-teal-100" 
+        <img
+          src={testimonial.image}
+          alt={testimonial.name}
+          className="object-cover w-12 h-12 rounded-full ring-2 ring-teal-100"
         />
         <div className="flex-1">
           <h3 className="font-medium text-gray-800">{testimonial.name}</h3>
           <p className="text-xs text-gray-600">{testimonial.role}</p>
         </div>
       </div>
-      
+
       <div className="flex mt-3">
         {[...Array(5)].map((_, i) => (
-          <FaStar 
-            key={i} 
-            className={`text-sm ${i < testimonial.rating ? 'text-amber-400' : 'text-gray-300'}`} 
+          <FaStar
+            key={i}
+            className={`text-sm ${i < testimonial.rating ? 'text-amber-400' : 'text-gray-300'}`}
           />
         ))}
       </div>

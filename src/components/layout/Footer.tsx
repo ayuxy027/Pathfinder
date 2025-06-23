@@ -1,17 +1,48 @@
-'use client'
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from 'react-icons/fa';
 
-const socialIcons = [
+interface SocialIcon {
+  Icon: React.ComponentType;
+  href: string;
+  label: string;
+}
+
+interface FooterLink {
+  label: string;
+  href: string;
+}
+
+interface FooterColumn {
+  title: string;
+  links: FooterLink[];
+}
+
+interface MeteorProps {
+  size: number;
+  duration: number;
+  delay: number;
+}
+
+interface StarProps {
+  top: number;
+  left: number;
+  size: number;
+}
+
+interface FooterLinkProps {
+  href: string;
+  children: React.ReactNode;
+}
+
+const socialIcons: SocialIcon[] = [
   { Icon: FaFacebookF, href: '#', label: 'Facebook' },
   { Icon: FaTwitter, href: '#', label: 'Twitter' },
   { Icon: FaInstagram, href: '#', label: 'Instagram' },
   { Icon: FaYoutube, href: '#', label: 'YouTube' },
 ];
 
-const footerLinks = [
+const footerLinks: FooterColumn[] = [
   {
     title: 'PathFinder',
     links: [
@@ -41,7 +72,7 @@ const footerLinks = [
   },
 ];
 
-const Meteor = ({ size, duration, delay }) => (
+const Meteor: React.FC<MeteorProps> = ({ size, duration, delay }) => (
   <motion.div
     className={`absolute bg-white rounded-full shadow-lg`}
     style={{
@@ -58,7 +89,7 @@ const Meteor = ({ size, duration, delay }) => (
   />
 );
 
-const Star = ({ top, left, size }) => (
+const Star: React.FC<StarProps> = ({ top, left, size }) => (
   <div
     className="absolute bg-white rounded-full animate-pulse"
     style={{
@@ -71,7 +102,7 @@ const Star = ({ top, left, size }) => (
   />
 );
 
-const FooterLink = ({ href, children }) => (
+const FooterLink: React.FC<FooterLinkProps> = ({ href, children }) => (
   <motion.a
     href={href}
     className="inline-block text-base transition-colors duration-300 hover:text-amber-300"
@@ -82,7 +113,7 @@ const FooterLink = ({ href, children }) => (
   </motion.a>
 );
 
-export default function Footer() {
+const Footer: React.FC = () => {
   return (
     <footer className="relative py-16 sm:py-20 overflow-hidden text-white bg-gradient-to-br from-teal-800 to-teal-900">
       <div className="absolute inset-0 overflow-hidden">
@@ -153,4 +184,6 @@ export default function Footer() {
       </div>
     </footer>
   );
-}
+};
+
+export default Footer;

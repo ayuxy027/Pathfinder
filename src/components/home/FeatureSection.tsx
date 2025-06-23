@@ -50,7 +50,7 @@ const FeatureSection = () => {
             Discover your perfect career path through our comprehensive approach
           </p>
         </motion.div>
-        
+
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 sm:gap-8">
           {features.map((feature, index) => (
             <FeatureCard key={index} feature={feature} index={index} />

@@ -41,7 +41,7 @@ const GlowingButton = () => {
   );
 };
 
-export default function EnhancedCTASection() {
+const EnhancedCTASection: React.FC = () => {
   return (
     <section className="overflow-hidden relative py-16 bg-gradient-to-br from-teal-50 to-white sm:py-20 lg:py-24">
       <div className="relative z-10 px-4 mx-auto max-w-7xl text-center sm:px-6 lg:px-8">
@@ -65,7 +65,7 @@ export default function EnhancedCTASection() {
             Unlock your potential through personalized career guidance and expert support!
           </motion.p>
         </motion.div>
-        
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -77,4 +77,6 @@ export default function EnhancedCTASection() {
       </div>
     </section>
   );
-}
+};
+
+export default EnhancedCTASection;

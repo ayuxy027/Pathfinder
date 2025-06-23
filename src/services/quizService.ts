@@ -1,12 +1,20 @@
 import { getPromptForQuestions, getFallbackPrompt } from './quizPrompt';
+import { QuizQuestion } from '../types';
+
+interface APIResponse {
+  candidates?: {
+    content?: {
+      parts?: {
+        text?: string;
+      }[];
+    };
+  }[];
+}
 
 /**
  * Generates quiz questions using an AI API
- * @param {string} topic - The quiz topic
- * @param {string} difficulty - The difficulty level
- * @returns {Promise<Array>} - Array of question objects
  */
-export const generateQuizQuestions = async (topic, difficulty) => {
+export const generateQuizQuestions = async (topic: string, difficulty: string): Promise<QuizQuestion[]> => {
   try {
     // First attempt with detailed prompt
     const prompt = getPromptForQuestions(topic, difficulty);
@@ -100,7 +108,7 @@ export const generateQuizQuestions = async (topic, difficulty) => {
 /**
  * Try to generate questions with a fallback prompt
  */
-const tryFallbackPrompt = async (topic, difficulty, apiKey) => {
+const tryFallbackPrompt = async (topic: string, difficulty: string, apiKey?: string): Promise<QuizQuestion[]> => {
   const fallbackPrompt = getFallbackPrompt(topic, difficulty);
   
   const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
@@ -160,10 +168,8 @@ const tryFallbackPrompt = async (topic, difficulty, apiKey) => {
 
 /**
  * Parses and validates the API response to ensure it contains properly formatted questions
- * @param {Object} data - The API response data
- * @returns {Array} - Validated array of question objects
  */
-const parseAndValidateQuestions = (data) => {
+const parseAndValidateQuestions = (data: any): QuizQuestion[] => {
   // Check if data contains questions array directly
   let questions = data.questions;
   
@@ -233,7 +239,7 @@ const parseAndValidateQuestions = (data) => {
  * @param {string} difficulty - The difficulty level
  * @returns {Array} - Array of question objects
  */
-export const generateMockQuestions = (topic, difficulty) => {
+export const generateMockQuestions = (topic: string, difficulty: string): QuizQuestion[] => {
   const mockQuestions = [];
   
   // Topic-specific mock questions

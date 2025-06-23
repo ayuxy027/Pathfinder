@@ -75,7 +75,7 @@ const cardVariants = {
 const MarqueeColumn = React.memo(({ cards, isLeft }) => {
   return (
     <div className="overflow-hidden relative h-full">
-      <div 
+      <div
         className={`flex flex-col gap-6 py-6 ${isLeft ? 'animate-scroll-up' : 'animate-scroll-down'}`}
         style={{
           animationDuration: '30s',
@@ -112,7 +112,7 @@ const Card = React.memo(({ card, index, isLeft }) => {
       animate={controls}
       className="w-full transform-gpu"
     >
-      <div 
+      <div
         className={`p-4 transition-all duration-500 bg-white border shadow-lg rounded-xl backdrop-blur-lg border-teal-50
           ${isLeft ? 'translate-x-2' : '-translate-x-2'}`}
         style={{
@@ -121,7 +121,7 @@ const Card = React.memo(({ card, index, isLeft }) => {
         }}
       >
         <div className="flex items-center space-x-4">
-          <div 
+          <div
             className="p-3 rounded-lg"
             style={{ backgroundColor: `${card.color}15`, color: card.color }}
           >
@@ -137,7 +137,7 @@ const Card = React.memo(({ card, index, isLeft }) => {
   );
 });
 
-function HeroSection() {
+const HeroSection: React.FC = () => {
   // Inject CSS animations
   useEffect(() => {
     const styleElement = document.createElement('style');
@@ -157,12 +157,12 @@ function HeroSection() {
           <LeftContent />
           {/* Hide carousels on small/medium screens, show only on large screens */}
           <div className="relative hidden lg:grid grid-cols-2 gap-8 h-[700px]">
-            <MarqueeColumn 
-              cards={cardDataLeft} 
+            <MarqueeColumn
+              cards={cardDataLeft}
               isLeft={true}
             />
-            <MarqueeColumn 
-              cards={cardDataRight} 
+            <MarqueeColumn
+              cards={cardDataRight}
               isLeft={false}
             />
           </div>
@@ -172,7 +172,7 @@ function HeroSection() {
   );
 }
 
-function BackgroundEffects() {
+const BackgroundEffects: React.FC = () => {
   const bgRef = useRef(null);
 
   useEffect(() => {
@@ -197,7 +197,7 @@ function BackgroundEffects() {
   );
 }
 
-function LeftContent() {
+const LeftContent: React.FC = () => {
   const contentRef = useRef(null);
 
   useEffect(() => {
@@ -223,7 +223,7 @@ function LeftContent() {
         <br />
         <span className="text-teal-600">Today!</span>
       </h1>
-      
+
       <p className="mt-6 text-lg leading-relaxed text-gray-600 sm:text-xl">
         Discover your perfect career path with AI-powered guidance and personalized recommendations.
       </p>

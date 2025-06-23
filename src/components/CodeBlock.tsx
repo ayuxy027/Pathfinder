@@ -1,16 +1,16 @@
 import React, { useMemo } from 'react';
 import './CodeTheme.css';
 
+interface CodeBlockProps {
+  code: string;
+  language?: string;
+  showLineNumbers?: boolean;
+}
+
 /**
  * A simple code block component with syntax highlighting using CSS
- * Replaces react-syntax-highlighter which has vulnerabilities
- * 
- * @param {Object} props - Component props
- * @param {string} props.code - The code to display
- * @param {string} props.language - The programming language (for CSS class)
- * @param {boolean} props.showLineNumbers - Whether to show line numbers
  */
-const CodeBlock = ({ code, language = 'javascript', showLineNumbers = false }) => {
+const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'javascript', showLineNumbers = false }) => {
   if (!code) return null;
   
   // Convert language for CSS class (e.g., 'javascript' -> 'language-javascript')
@@ -20,8 +20,8 @@ const CodeBlock = ({ code, language = 'javascript', showLineNumbers = false }) =
   const codeLines = code.split('\n');
   
   // Simple syntax highlighting function
-  const highlightedCode = useMemo(() => {
-    return codeLines.map((line) => {
+  const highlightedCode = useMemo((): string[] => {
+    return codeLines.map((line: string): string => {
       // Very basic highlighting - in a real app you might want to use a tokenizer library
       // But for our purposes, we'll just use some basic regex
       

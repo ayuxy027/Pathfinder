@@ -1,10 +1,19 @@
-const getAIPrompt = (userInput, profession, skillSections = [], options = { logErrors: false }) => {
+interface PromptOptions {
+  logErrors?: boolean;
+}
+
+const getAIPrompt = (
+  userInput: string, 
+  profession: string, 
+  skillSections: string[] = [], 
+  options: PromptOptions = { logErrors: false }
+): string => {
     // Helper: Validate input as non-empty strings
-    const isValidString = (str) =>
+    const isValidString = (str: any): str is string =>
       typeof str === 'string' && str.trim().length > 0;
   
     // Helper: Sanitize inputs to prevent code injections (XSS, SQL injection, etc.)
-    const sanitizeInput = (input) =>
+    const sanitizeInput = (input: string): string =>
       input.replace(/[<>`"'{}]/g, '').trim();
   
     // Input Validation: Strict checks with specific error messages
@@ -83,7 +92,7 @@ ${skillSections.map(skill => `- ${skill}`).join('\n')}
     return prompt;
   
     // Handle invalid inputs with logging (if enabled)
-    function handleInvalidInput(errorMessage) {
+    function handleInvalidInput(errorMessage: string): never {
       if (options.logErrors) {
         console.error(`[getAIPrompt Error] ${errorMessage}`);
       }

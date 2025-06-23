@@ -1,7 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { LoadingSpinnerProps } from '../../types';
 
-const EnhancedLoadingSpinner = () => {
+const EnhancedLoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
+  size = 'md', 
+  color = 'blue-500', 
+  text = 'Loading...' 
+}) => {
   const containerVariants = {
     start: {
       transition: {
@@ -30,8 +35,14 @@ const EnhancedLoadingSpinner = () => {
     ease: 'easeInOut',
   };
 
+  const sizeClasses = {
+    sm: "w-2 h-2",
+    md: "w-3 h-3", 
+    lg: "w-4 h-4"
+  };
+
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
       <motion.div
         className="flex space-x-2"
         variants={containerVariants}
@@ -41,13 +52,13 @@ const EnhancedLoadingSpinner = () => {
         {[0, 1, 2].map((index) => (
           <motion.span
             key={index}
-            className="w-3 h-3 bg-blue-500 rounded-full"
+            className={`${sizeClasses[size]} bg-${color} rounded-full`}
             variants={circleVariants}
             transition={circleTransition}
           />
         ))}
       </motion.div>
-      <p className="mt-4 text-lg font-semibold text-gray-700">Loading...</p>
+      <p className="mt-4 text-lg font-semibold text-gray-700">{text}</p>
     </div>
   );
 };

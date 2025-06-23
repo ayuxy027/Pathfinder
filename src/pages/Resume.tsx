@@ -9,6 +9,7 @@ import 'jspdf-autotable';
 import { ErrorBoundary } from 'react-error-boundary';
 import { v4 as uuidv4 } from 'uuid';
 import autoAnimate from '@formkit/auto-animate';
+import { ResumeData, PersonalInfo, Experience, Education, Skill, Project } from '../types';
 
 // Constants
 const MAX_NAME_LENGTH = 100;
@@ -17,39 +18,101 @@ const MAX_SKILLS = 20;
 const MAX_EXPERIENCES = 10;
 const MAX_EDUCATION = 5;
 
-const RESUME_TEMPLATES = [
+interface ResumeTemplate {
+  id: string;
+  name: string;
+  color: string;
+}
+
+interface Tab {
+  id: string;
+  label: string;
+  icon: React.ComponentType<any>;
+}
+
+interface Link {
+  id: string;
+  title: string;
+  url: string;
+}
+
+interface Achievement {
+  id: string;
+  text: string;
+}
+
+interface FormDataType {
+  about: {
+    name: string;
+    email: string;
+    phone: string;
+    location: string;
+    summary: string;
+    profession: string;
+    photo: string | null;
+    links: Link[];
+  };
+  education: {
+    id: string;
+    degree: string;
+    institution: string;
+    year: string;
+    description: string;
+  }[];
+  skills: {
+    id: string;
+    name: string;
+    level: string;
+  }[];
+  experience: {
+    id: string;
+    title: string;
+    company: string;
+    period: string;
+    current: boolean;
+    location: string;
+    responsibilities: string;
+    achievements: Achievement[];
+  }[];
+}
+
+interface Errors {
+  [key: string]: string;
+}
+
+const RESUME_TEMPLATES: ResumeTemplate[] = [
   { id: 'modern', name: 'Modern', color: 'teal' },
   { id: 'professional', name: 'Professional', color: 'blue' },
   { id: 'creative', name: 'Creative', color: 'purple' },
   { id: 'minimal', name: 'Minimal', color: 'gray' },
 ];
 
-const tabs = [
+const tabs: Tab[] = [
   { id: 'about', label: 'About', icon: User },
   { id: 'education', label: 'Education', icon: BookOpen },
   { id: 'skills', label: 'Skills', icon: Award },
   { id: 'experience', label: 'Experience', icon: Briefcase },
 ];
 
-const professionCategories = [
+const professionCategories: string[] = [
   'Technology', 'Healthcare', 'Education', 'Finance', 'Arts & Entertainment',
   'Legal', 'Marketing', 'Engineering', 'Hospitality', 'Other'
 ];
 
 // Utility functions
-const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-const isValidPhone = (phone) => /^\+?[\d\s-]{10,14}$/.test(phone);
-const sanitizeInput = (input) => {
+const isValidEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const isValidPhone = (phone: string): boolean => /^\+?[\d\s-]{10,14}$/.test(phone);
+const sanitizeInput = (input: any): any => {
   if (typeof input === 'string') {
     return input.replace(/[<>&'"]/g, (char) => ({ '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;', '&': '&amp;' }[char]));
   }
   return input;
 };
 
-const ResumeBuilder = () => {
-  const [activeTab, setActiveTab] = useState('about');
-  const [selectedTemplate, setSelectedTemplate] = useState(RESUME_TEMPLATES[0]);
-  const [formData, setFormData] = useState({
+const ResumeBuilder: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<string>('about');
+  const [selectedTemplate, setSelectedTemplate] = useState<ResumeTemplate>(RESUME_TEMPLATES[0]);
+  const [formData, setFormData] = useState<FormDataType>({
     about: { 
       name: '', 
       email: '', 
@@ -74,17 +137,17 @@ const ResumeBuilder = () => {
     }]
   });
   
-  const [showPreview, setShowPreview] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [isDragging, setIsDragging] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const dragItem = useRef();
-  const dragOverItem = useRef();
-  const fileInputRef = useRef();
+  const [showPreview, setShowPreview] = useState<boolean>(false);
+  const [errors, setErrors] = useState<Errors>({});
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [showSettings, setShowSettings] = useState<boolean>(false);
+  const dragItem = useRef<number>();
+  const dragOverItem = useRef<number>();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const validateForm = useCallback(() => {
-    const newErrors = {};
+  const validateForm = useCallback((): boolean => {
+    const newErrors: Errors = {};
 
     // Validate About section
     if (!formData.about.name.trim()) newErrors.name = 'Name is required';
@@ -120,7 +183,7 @@ const ResumeBuilder = () => {
     return Object.keys(newErrors).length === 0;
   }, [formData]);
 
-  const handleInputChange = useCallback((section, field, value, index = 0) => {
+  const handleInputChange = useCallback((section: keyof FormDataType, field: string, value: any, index: number = 0): void => {
     setFormData(prev => ({
       ...prev,
       [section]: Array.isArray(prev[section])
@@ -135,7 +198,7 @@ const ResumeBuilder = () => {
     }));
   }, []);
 
-  const addItem = useCallback((section) => {
+  const addItem = useCallback((section: keyof FormDataType): void => {
     setFormData(prev => {
       if (
         (section === 'education' && prev.education.length >= MAX_EDUCATION) ||
@@ -174,21 +237,21 @@ const ResumeBuilder = () => {
     });
   }, []);
 
-  const removeItem = useCallback((section, index) => {
+  const removeItem = useCallback((section: keyof FormDataType, index: number): void => {
     setFormData(prev => ({
       ...prev,
       [section]: prev[section].filter((_, i) => i !== index)
     }));
   }, []);
 
-  const handleSubmit = useCallback((e) => {
+  const handleSubmit = useCallback((e: React.FormEvent): void => {
     e.preventDefault();
     if (validateForm()) {
       setShowPreview(true);
     }
   }, [validateForm]);
 
-  const handleDownload = useCallback(() => {
+  const handleDownload = useCallback((): void => {
     try {
       const doc = new jsPDF();
       const { about, education, skills, experience } = formData;

@@ -4,26 +4,67 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, P
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, BookOpen, Code, Link, Clock, Award, Calendar, BarChart2, Lightbulb, ChevronRight, Star, Users, Zap } from 'lucide-react';
+import { ProgressData } from '../types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
-const Progress = () => {
+interface UserData {
+  totalHours: number;
+  coursesCompleted: number;
+  rank: number;
+  certificatesEarned: number;
+}
+
+interface Insight {
+  id: number;
+  text: string;
+  icon: React.ReactNode;
+}
+
+interface Achievement {
+  name: string;
+  description: string;
+  date: string;
+  icon: React.ReactNode;
+}
+
+interface SkillData {
+  [key: string]: number;
+}
+
+interface ProgressDataType {
+  weekly: number[];
+  monthly: number[];
+  yearly: number[];
+}
+
+interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  thisWeek: number;
+  totalDays: number;
+}
+
+type ChartType = 'skills' | 'progress';
+type MetricType = 'weekly' | 'monthly' | 'yearly';
+
+const Progress: React.FC = () => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth0();
-  const [userData, setUserData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeChart, setActiveChart] = useState('skills');
-  const [activeMetric, setActiveMetric] = useState('weekly');
-  const [error, setError] = useState(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [activeChart, setActiveChart] = useState<ChartType>('skills');
+  const [activeMetric, setActiveMetric] = useState<MetricType>('weekly');
+  const [error, setError] = useState<string | null>(null);
 
   // Insights data
-  const insights = [
+  const insights: Insight[] = [
     { id: 1, text: "You're in the top 15% of JavaScript learners this month", icon: <Zap className="text-yellow-400" /> },
     { id: 2, text: "Your React skills have improved 34% in the last 30 days", icon: <BarChart2 className="text-green-400" /> },
     { id: 3, text: "Consider exploring GraphQL to complement your API knowledge", icon: <Lightbulb className="text-blue-400" /> },
   ];
 
   // Skill data
-  const skillData = {
+  const skillData: SkillData = {
     JavaScript: 85,
     React: 78,
     "Node.js": 72,
@@ -33,14 +74,14 @@ const Progress = () => {
   };
 
   // Progress data for different time periods
-  const progressData = {
+  const progressData: ProgressDataType = {
     weekly: [35, 42, 50, 45, 62, 68, 75],
     monthly: [320, 380, 450, 520, 610, 580, 650],
     yearly: [1200, 1850, 2400, 3600, 4200, 5100, 5800]
   };
 
   // Learning streak data
-  const streakData = {
+  const streakData: StreakData = {
     currentStreak: 12,
     longestStreak: 28,
     thisWeek: 5,
@@ -48,7 +89,7 @@ const Progress = () => {
   };
 
   // Achievement data
-  const achievements = [
+  const achievements: Achievement[] = [
     { name: "Frontend Master", description: "Completed all React advanced courses", date: "2 days ago", icon: <Code className="text-blue-400" /> },
     { name: "Algorithm Adept", description: "Solved 50 algorithm challenges", date: "Last week", icon: <Star className="text-yellow-400" /> },
     { name: "Consistent Learner", description: "Maintained a 7-day streak", date: "3 weeks ago", icon: <Clock className="text-green-400" /> },
@@ -56,7 +97,7 @@ const Progress = () => {
 
   // Mock API fetch
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (): Promise<void> => {
       try {
         // Simulating API call
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -144,7 +185,7 @@ const Progress = () => {
   };
 
   // Progress chart data
-  const getProgressChartData = (metric) => ({
+  const getProgressChartData = (metric: MetricType) => ({
     labels: metric === 'weekly' 
       ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
       : metric === 'monthly'

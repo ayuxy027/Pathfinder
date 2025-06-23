@@ -1,10 +1,7 @@
 /**
  * Generates the prompt for quiz questions based on topic and difficulty
- * @param {string} topic - The quiz topic (e.g., JavaScript, React)
- * @param {string} difficulty - The difficulty level (e.g., beginner, intermediate, advanced)
- * @returns {string} The formatted prompt
  */
-export const getPromptForQuestions = (topic, difficulty) => {
+export const getPromptForQuestions = (topic: string, difficulty: string): string => {
   return `Generate 5 multiple-choice questions about ${topic} with ${difficulty} difficulty level.
 
 IMPORTANT: Your response MUST be valid JSON following EXACTLY this format without ANY additional text, markdown formatting, or explanations outside the JSON structure:
@@ -49,11 +46,8 @@ DO NOT include anything outside the JSON structure. No markdown, no code blocks,
 
 /**
  * Function to generate a fallback prompt if the main one fails
- * @param {string} topic - The quiz topic
- * @param {string} difficulty - The difficulty level
- * @returns {string} A simpler prompt to try as fallback
  */
-export const getFallbackPrompt = (topic, difficulty) => {
+export const getFallbackPrompt = (topic: string, difficulty: string): string => {
   return `Create 3 multiple choice questions about ${topic} at ${difficulty} level. 
   Format as JSON with array of questions containing: question, options (array of 4 choices), 
   correctAnswer (exact text of correct option), and explanation fields. 

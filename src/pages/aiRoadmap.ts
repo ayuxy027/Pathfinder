@@ -4,17 +4,42 @@ import JSON5 from 'json5';
 import _ from 'lodash';
 import getAIPrompt from './aiPrompt2';
 
+interface RoadmapStage {
+  stage: string;
+  description: string;
+  skills: string[];
+  resources: {
+    name: string;
+    type: string;
+    link: string;
+  }[];
+}
+
+interface Flashcard {
+  question: string;
+  answer: string;
+}
+
+interface RoadmapResponse {
+  roadmap: RoadmapStage[];
+  flashcards: Flashcard[];
+}
+
 const API_KEY = import.meta.env.VITE_API_KEY;
 const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 
-const extractJSONFromMarkdown = (markdown) => {
+const extractJSONFromMarkdown = (markdown: string): string | null => {
   const tokenizer = new marked.Tokenizer();
   const tokens = marked.lexer(markdown);
-  const codeBlocks = tokens.filter(token => token.type === 'code' && token.lang === 'json');
+  const codeBlocks = tokens.filter((token: any) => token.type === 'code' && token.lang === 'json');
   return codeBlocks.length > 0 ? codeBlocks[0].text : null;
 };
 
-export const getAIResponse = async (userInput, profession, skillSections = []) => {
+export const getAIResponse = async (
+  userInput: string, 
+  profession: string, 
+  skillSections: string[] = []
+): Promise<RoadmapResponse> => {
   try {
     if (!API_KEY) {
       throw new Error('API key is missing');

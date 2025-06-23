@@ -3,17 +3,16 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ErrorBoundary } from 'react-error-boundary';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
-import EnhancedLoadingSpinner from './components/shared/EnhancedLoadingSpinner';
 import ErrorFallback from './components/shared/ErrorFallback';
 
 // Direct imports instead of lazy loading
-import Home from './pages/Home.jsx';
-import Progress from './pages/Progress.jsx';
-import Quiz from './pages/Quiz.jsx';
-import Resume from './pages/Resume.jsx';
-import Roadmap from './pages/Roadmap.jsx';
+import Home from './pages/Home';
+import Progress from './pages/Progress';
+import Quiz from './pages/Quiz';
+import Resume from './pages/Resume';
+import Roadmap from './pages/Roadmap';
 
-function App() {
+const App: React.FC = () => {
   return (
     <Router>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -36,6 +35,6 @@ function App() {
       </ErrorBoundary>
     </Router>
   );
-}
+};
 
 export default App;

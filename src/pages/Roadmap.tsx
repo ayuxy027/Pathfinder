@@ -9,9 +9,51 @@ import {
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { RoadmapNode, Resource } from '../types';
+
+interface ProfessionTemplate {
+  name: string;
+  goals: string[];
+}
+
+interface RoadmapData {
+  roadmap: RoadmapStage[];
+  flashcards: Flashcard[];
+}
+
+interface RoadmapStage {
+  stage: string;
+  description: string;
+  skills: string[];
+  resources: RoadmapResource[];
+}
+
+interface RoadmapResource {
+  name: string;
+  type: string;
+  link: string;
+}
+
+interface Flashcard {
+  question: string;
+  answer: string;
+}
+
+interface SavedRoadmap {
+  id: number;
+  date: string;
+  profession: string;
+  goal: string;
+  data: RoadmapData;
+}
+
+interface TooltipProps {
+  children: React.ReactNode;
+  content: string;
+}
 
 // Common profession templates to help users get started quickly
-const PROFESSION_TEMPLATES = [
+const PROFESSION_TEMPLATES: ProfessionTemplate[] = [
   { name: 'Software Developer', goals: ['Frontend', 'Backend', 'Full-Stack', 'DevOps', 'Mobile'] },
   { name: 'Data Scientist', goals: ['Machine Learning', 'Big Data', 'NLP', 'Computer Vision', 'Analytics'] },
   { name: 'Designer', goals: ['UI/UX', 'Product Design', 'Graphic Design', 'Motion Graphics', 'Branding'] },
@@ -20,7 +62,7 @@ const PROFESSION_TEMPLATES = [
 ];
 
 // Sample goal templates that can be quickly inserted
-const GOAL_TEMPLATES = [
+const GOAL_TEMPLATES: string[] = [
   'Advance to a senior position in my field',
   'Transition to a leadership role',
   'Learn the latest technologies',
@@ -30,7 +72,7 @@ const GOAL_TEMPLATES = [
 ];
 
 // Default skill categories to help users
-const DEFAULT_SKILL_CATEGORIES = [
+const DEFAULT_SKILL_CATEGORIES: string[] = [
   'Technical Skills',
   'Soft Skills',
   'Industry Knowledge',
@@ -40,8 +82,8 @@ const DEFAULT_SKILL_CATEGORIES = [
   'Project Management'
 ];
 
-const Tooltip = ({ children, content }) => {
-  const [isVisible, setIsVisible] = useState(false);
+const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
+  const [isVisible, setIsVisible] = useState<boolean>(false);
   
   return (
     <div className="inline-flex relative items-center" 
@@ -57,27 +99,27 @@ const Tooltip = ({ children, content }) => {
   );
 };
 
-const Roadmap = () => {
-  const [profession, setProfession] = useState('');
-  const [userInput, setUserInput] = useState('');
-  const [roadmapData, setRoadmapData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [showTemplates, setShowTemplates] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [savedRoadmaps, setSavedRoadmaps] = useState(() => {
+const Roadmap: React.FC = () => {
+  const [profession, setProfession] = useState<string>('');
+  const [userInput, setUserInput] = useState<string>('');
+  const [roadmapData, setRoadmapData] = useState<RoadmapData | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showTemplates, setShowTemplates] = useState<boolean>(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<ProfessionTemplate | null>(null);
+  const [savedRoadmaps, setSavedRoadmaps] = useState<SavedRoadmap[]>(() => {
     const saved = localStorage.getItem('savedRoadmaps');
     return saved ? JSON.parse(saved) : [];
   });
-  const [isCopied, setIsCopied] = useState(false);
-  const roadmapRef = useRef(null);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
+  const roadmapRef = useRef<HTMLDivElement>(null);
   
   // Custom skill sections state
-  const [skillSections, setSkillSections] = useState([]);
-  const [newSectionName, setNewSectionName] = useState('');
-  const [showSectionInput, setShowSectionInput] = useState(false);
+  const [skillSections, setSkillSections] = useState<string[]>([]);
+  const [newSectionName, setNewSectionName] = useState<string>('');
+  const [showSectionInput, setShowSectionInput] = useState<boolean>(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -104,7 +146,7 @@ const Roadmap = () => {
     }
   };
 
-  const getResourceIcon = (type) => {
+  const getResourceIcon = (type?: string): React.ReactNode => {
     switch (type?.toLowerCase()) {
       case 'book': return <BookOpen className="mr-2 w-4 h-4 text-teal-600" />;
       case 'course': return <Code className="mr-2 w-4 h-4 text-purple-600" />;
@@ -115,17 +157,17 @@ const Roadmap = () => {
     }
   };
 
-  const selectProfessionTemplate = (template) => {
+  const selectProfessionTemplate = (template: ProfessionTemplate): void => {
     setProfession(template.name);
     setSelectedTemplate(template);
     setShowTemplates(false);
   };
 
-  const insertGoal = (goal) => {
+  const insertGoal = (goal: string): void => {
     setUserInput(goal);
   };
 
-  const addSkillSection = () => {
+  const addSkillSection = (): void => {
     if (newSectionName.trim() !== '') {
       setSkillSections([...skillSections, newSectionName.trim()]);
       setNewSectionName('');
@@ -133,22 +175,22 @@ const Roadmap = () => {
     }
   };
 
-  const removeSkillSection = (index) => {
+  const removeSkillSection = (index: number): void => {
     const updatedSections = [...skillSections];
     updatedSections.splice(index, 1);
     setSkillSections(updatedSections);
   };
 
-  const addDefaultSkillSection = (section) => {
+  const addDefaultSkillSection = (section: string): void => {
     if (!skillSections.includes(section)) {
       setSkillSections([...skillSections, section]);
     }
   };
 
-  const saveRoadmap = () => {
+  const saveRoadmap = (): void => {
     if (!roadmapData || !profession) return;
     
-    const newSavedRoadmap = {
+    const newSavedRoadmap: SavedRoadmap = {
       id: Date.now(),
       date: new Date().toLocaleDateString(),
       profession,
@@ -164,19 +206,21 @@ const Roadmap = () => {
     alert('Roadmap saved successfully!');
   };
 
-  const loadRoadmap = (savedRoadmap) => {
+  const loadRoadmap = (savedRoadmap: SavedRoadmap): void => {
     setProfession(savedRoadmap.profession);
     setUserInput(savedRoadmap.goal);
     setRoadmapData(savedRoadmap.data);
   };
 
-  const deleteSavedRoadmap = (id) => {
+  const deleteSavedRoadmap = (id: number): void => {
     const updatedRoadmaps = savedRoadmaps.filter(roadmap => roadmap.id !== id);
     setSavedRoadmaps(updatedRoadmaps);
     localStorage.setItem('savedRoadmaps', JSON.stringify(updatedRoadmaps));
   };
 
-  const copyToClipboard = () => {
+  const copyToClipboard = (): void => {
+    if (!roadmapData) return;
+    
     const text = `Career Roadmap for ${profession}\nGoal: ${userInput}\n\n` + 
       roadmapData.roadmap.map((stage, i) => 
         `STAGE ${i+1}: ${stage.stage}\n${stage.description}\n\nSkills:\n` + 
@@ -191,7 +235,7 @@ const Roadmap = () => {
     });
   };
 
-  const exportToPDF = async () => {
+  const exportToPDF = async (): Promise<void> => {
     if (!roadmapRef.current) return;
     
     const canvas = await html2canvas(roadmapRef.current);

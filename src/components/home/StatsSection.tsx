@@ -34,7 +34,7 @@ const StatsSection = () => {
   return (
     <section ref={ref} className="py-16 bg-gradient-to-br from-teal-50 to-white sm:py-20 lg:py-24">
       <div className="relative px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        
+
         {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

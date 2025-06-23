@@ -15,8 +15,23 @@ import {
 } from 'lucide-react';
 import { generateQuizQuestions, generateMockQuestions } from '../services/quizService';
 import CodeBlock from '../components/CodeBlock';
+import { QuizQuestion } from '../types';
 
-const QUIZ_TOPICS = [
+interface QuizTopic {
+  id: string;
+  name: string;
+  icon: string;
+}
+
+interface DifficultyLevel {
+  id: string;
+  name: string;
+  color: string;
+}
+
+type ScreenType = 'config' | 'quiz' | 'result';
+
+const QUIZ_TOPICS: QuizTopic[] = [
   { id: 'html', name: 'HTML', icon: '📄' },
   { id: 'css', name: 'CSS', icon: '🎨' },
   { id: 'javascript', name: 'JavaScript', icon: '⚡' },
@@ -24,28 +39,28 @@ const QUIZ_TOPICS = [
   { id: 'node', name: 'Node.js', icon: '🟢' },
 ];
 
-const DIFFICULTY_LEVELS = [
+const DIFFICULTY_LEVELS: DifficultyLevel[] = [
   { id: 'beginner', name: 'Beginner', color: 'bg-green-500' },
   { id: 'intermediate', name: 'Intermediate', color: 'bg-yellow-500' },
   { id: 'advanced', name: 'Advanced', color: 'bg-red-500' },
 ];
 
-const Quiz = () => {
-  const [screen, setScreen] = useState('config');
-  const [topic, setTopic] = useState('javascript');
-  const [difficulty, setDifficulty] = useState('intermediate');
-  const [questions, setQuestions] = useState([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [isCorrect, setIsCorrect] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(30);
-  const [streak, setStreak] = useState(0);
-  const [highestStreak, setHighestStreak] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [showExplanation, setShowExplanation] = useState(false);
-  const timerRef = useRef(null);
+const Quiz: React.FC = () => {
+  const [screen, setScreen] = useState<ScreenType>('config');
+  const [topic, setTopic] = useState<string>('javascript');
+  const [difficulty, setDifficulty] = useState<string>('intermediate');
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
+  const [score, setScore] = useState<number>(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | string | null>(null);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number>(30);
+  const [streak, setStreak] = useState<number>(0);
+  const [highestStreak, setHighestStreak] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showExplanation, setShowExplanation] = useState<boolean>(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (screen === 'quiz' && !showExplanation && !selectedAnswer) {
@@ -59,16 +74,20 @@ const Quiz = () => {
     }
   }, [screen, showExplanation, selectedAnswer]);
 
-  const handleTimeout = () => {
-    clearInterval(timerRef.current);
+  const handleTimeout = (): void => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
     setSelectedAnswer('TIMEOUT');
     setIsCorrect(false);
     setShowExplanation(true);
     setStreak(0);
   };
 
-  const handleAnswerClick = (answer) => {
-    clearInterval(timerRef.current);
+  const handleAnswerClick = (answer: number): void => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
     const correct = answer === questions[currentQuestionIndex].correctAnswer;
     setSelectedAnswer(answer);
     setIsCorrect(correct);
@@ -87,7 +106,7 @@ const Quiz = () => {
     }
   };
 
-  const startQuiz = async () => {
+  const startQuiz = async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
     setScore(0);
@@ -116,7 +135,8 @@ const Quiz = () => {
       }
     } catch (err) {
       console.error('Error starting quiz:', err);
-      setError(`${err.message}. Please try again or select a different topic.`);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(`${errorMessage}. Please try again or select a different topic.`);
       
       // Try with mock questions as a UI fallback
       console.log('Using mock questions as UI fallback');
@@ -130,7 +150,7 @@ const Quiz = () => {
     }
   };
 
-  const nextQuestion = () => {
+  const nextQuestion = (): void => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(i => i + 1);
       resetQuestionState();
@@ -140,14 +160,14 @@ const Quiz = () => {
     }
   };
 
-  const resetQuestionState = () => {
+  const resetQuestionState = (): void => {
     setSelectedAnswer(null);
     setIsCorrect(null);
     setTimeLeft(30);
     setShowExplanation(false);
   };
 
-  const restartQuiz = () => {
+  const restartQuiz = (): void => {
     setScreen('config');
   };
 
