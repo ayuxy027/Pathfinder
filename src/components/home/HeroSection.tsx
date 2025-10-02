@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, useAnimation, Variants } from 'framer-motion';
-import { gsap } from 'gsap';
 import { ChevronRight, GraduationCap, Target, Users, Sparkles, MessageSquare, FileText, Map, Brain, Briefcase, Award, Flag, Star, Settings, Heart, Code, Coffee } from 'lucide-react';
+import MarqueeColumn from '../shared/MarqueeColumn';
 
 interface CardData {
   icon: React.ComponentType<{ className?: string; size?: number }>;
@@ -12,30 +12,15 @@ interface CardData {
 
 const SCROLL_ANIMATIONS = `
   @keyframes scroll-up {
-    0% {
-      transform: translateY(0);
-    }
-    100% {
-      transform: translateY(-50%);
-    }
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
   }
-  
   @keyframes scroll-down {
-    0% {
-      transform: translateY(-50%);
-    }
-    100% {
-      transform: translateY(0);
-    }
+    0% { transform: translateY(-50%); }
+    100% { transform: translateY(0); }
   }
-  
-  .animate-scroll-up {
-    animation: scroll-up 30s linear infinite;
-  }
-  
-  .animate-scroll-down {
-    animation: scroll-down 30s linear infinite;
-  }
+  .animate-scroll-up { animation: scroll-up 30s linear infinite; }
+  .animate-scroll-down { animation: scroll-down 30s linear infinite; }
 `;
 
 const cardDataLeft: CardData[] = [
@@ -78,34 +63,17 @@ const cardVariants: Variants = {
   }),
 };
 
-interface MarqueeColumnProps {
-  cards: CardData[];
-  isLeft: boolean;
-}
-
-const MarqueeColumn: React.FC<MarqueeColumnProps> = React.memo(({ cards, isLeft }) => (
-  <div className="overflow-hidden relative h-full">
-    <div
-      className={`flex flex-col gap-6 py-6 ${isLeft ? 'animate-scroll-up' : 'animate-scroll-down'}`}
-      style={{
-        animationDuration: '30s',
-        animationTimingFunction: 'linear',
-        animationIterationCount: 'infinite',
-      }}
-    >
-      {/* First set of cards */}
-      {cards.map((card, index) => (
-        <Card key={`first-${index}-${card.title}`} {...card} index={index} isLeft={isLeft} />
-      ))}
-      {/* Duplicate set for seamless loop */}
-      {cards.map((card, index) => (
-        <Card key={`second-${index}-${card.title}`} {...card} index={index} isLeft={isLeft} />
-      ))}
-    </div>
-  </div>
-));
-
-MarqueeColumn.displayName = 'MarqueeColumn';
+interface ColumnProps { cards: CardData[]; isLeft: boolean; }
+const Column: React.FC<ColumnProps> = ({ cards, isLeft }) => (
+  <MarqueeColumn isLeft={isLeft}>
+    {cards.map((card, index) => (
+      <Card key={`first-${index}-${card.title}`} {...card} index={index} />
+    ))}
+    {cards.map((card, index) => (
+      <Card key={`second-${index}-${card.title}`} {...card} index={index} />
+    ))}
+  </MarqueeColumn>
+);
 
 interface CardProps {
   icon: React.ComponentType<{ className?: string; size?: number }>;
@@ -113,10 +81,9 @@ interface CardProps {
   description: string;
   color: string;
   index: number;
-  isLeft: boolean;
 }
 
-const Card: React.FC<CardProps> = React.memo(({ icon: Icon, title, description, color, index, isLeft }) => {
+const Card: React.FC<CardProps> = React.memo(({ icon: Icon, title, description, color, index }) => {
   const controls = useAnimation();
 
   useEffect(() => {
@@ -129,16 +96,11 @@ const Card: React.FC<CardProps> = React.memo(({ icon: Icon, title, description, 
       variants={cardVariants}
       initial="initial"
       animate={controls}
-      className="w-full transform-gpu"
+      className="w-full"
     >
       <div
-        className={`p-4 transition-all duration-500 bg-white border shadow-lg rounded-xl backdrop-blur-lg border-teal-50 ${
-          isLeft ? 'translate-x-2' : '-translate-x-2'
-        }`}
-        style={{
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-          transform: `perspective(1000px) rotateY(${isLeft ? '5deg' : '-5deg'})`,
-        }}
+        className={`p-4 mx-2 transition-all duration-500 bg-white border shadow-lg rounded-xl backdrop-blur-lg border-teal-50`}
+        style={{ boxShadow: '0 3px 12px rgba(0, 0, 0, 0.08)' }}
       >
         <div className="flex items-center space-x-4">
           <div
@@ -180,8 +142,8 @@ const HeroSection: React.FC = () => {
           <LeftContent />
           {/* Hide carousels on small/medium screens, show only on large screens */}
           <div className="relative hidden lg:grid grid-cols-2 gap-8 h-[700px]">
-            <MarqueeColumn cards={cardDataLeft} isLeft={true} />
-            <MarqueeColumn cards={cardDataRight} isLeft={false} />
+            <Column cards={cardDataLeft} isLeft={true} />
+            <Column cards={cardDataRight} isLeft={false} />
           </div>
         </div>
       </div>
@@ -202,41 +164,50 @@ const BackgroundEffects: React.FC = () => {
 const LeftContent: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(contentRef.current?.children || [], {
-        y: 50,
-        opacity: 0,
-        duration: 1.2,
-        stagger: 0.3,
-        ease: "power4.out",
-      });
-    }, contentRef);
-
-    return () => ctx.revert();
-  }, []);
+  // Replace GSAP entry with simple Framer Motion stagger on initial render
 
   return (
-    <div ref={contentRef} className="relative z-10">
-      <h1 className="text-4xl font-medium leading-tight lg:text-5xl xl:text-6xl">
+    <motion.div
+      ref={contentRef}
+      className="relative z-10"
+      initial="hidden"
+      animate="visible"
+      variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.2 } } }}
+    >
+      <motion.h1
+        className="text-4xl font-medium leading-tight lg:text-5xl xl:text-6xl"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.43, 0.13, 0.23, 0.96] }}
+      >
         <span className="text-teal-600">Navigate Your Career</span>
         <br />
         <span className="text-amber-400">AI Powered</span>
         <br />
         <span className="text-teal-600">Today!</span>
-      </h1>
+      </motion.h1>
 
-      <p className="mt-6 text-lg leading-relaxed text-gray-600 sm:text-xl">
+      <motion.p
+        className="mt-6 text-lg leading-relaxed text-gray-600 sm:text-xl"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2, ease: [0.43, 0.13, 0.23, 0.96] }}
+      >
         Discover your perfect career path with AI-powered guidance and personalized recommendations.
-      </p>
+      </motion.p>
 
-      <div className="mt-8 sm:mt-10">
+      <motion.div
+        className="mt-8 sm:mt-10"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4, ease: [0.43, 0.13, 0.23, 0.96] }}
+      >
         <button className="flex items-center px-8 py-3 text-base font-medium text-white bg-teal-600 rounded-full transition-all transform sm:text-lg hover:bg-teal-700 hover:scale-105 group">
           Get Started
           <ChevronRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
         </button>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
