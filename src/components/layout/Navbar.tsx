@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Briefcase, ChevronDown, Map, TrendingUp, Calendar } from 'lucide-react';
+import { Menu, X, Map, TrendingUp, Calendar, GraduationCap } from 'lucide-react';
 import { Link, useLocation, Location } from 'react-router-dom';
 
 interface NavItemData {
@@ -16,12 +16,10 @@ interface ExternalResource {
 }
 
 const navItems: NavItemData[] = [
-  { name: 'Roadmap Generation', link: '/roadmap', icon: <Map size={18} /> },
-  { name: 'My Progress', link: '/progress', icon: <TrendingUp size={18} /> },
-  { name: 'Build Your Resume', link: '/resume', icon: <Calendar size={18} /> }
-];
-
-const serviceItems: NavItemData[] = [
+  { name: 'Exam Prep', link: '/exam-prep', icon: <GraduationCap size={18} /> },
+  { name: 'Roadmap', link: '/roadmap', icon: <Map size={18} /> },
+  { name: 'Progress', link: '/progress', icon: <TrendingUp size={18} /> },
+  { name: 'Resume', link: '/resume', icon: <Calendar size={18} /> }
 ];
 
 const externalResources: ExternalResource[] = [
@@ -32,7 +30,6 @@ const externalResources: ExternalResource[] = [
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
-  const [showServicesDropdown, setShowServicesDropdown] = useState<boolean>(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -50,9 +47,7 @@ const Navbar: React.FC = () => {
     setIsOpen(!isOpen);
   };
 
-  const toggleServicesDropdown = (): void => {
-    setShowServicesDropdown(!showServicesDropdown);
-  };
+
 
   return (
     <>
@@ -68,7 +63,7 @@ const Navbar: React.FC = () => {
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <Logo />
-            <DesktopNav location={location} showServicesDropdown={showServicesDropdown} toggleServicesDropdown={toggleServicesDropdown} />
+            <DesktopNav location={location} />
             <div className="flex items-center space-x-2 sm:space-x-4">
               <MobileMenuToggle isOpen={isOpen} toggleMenu={toggleMenu} />
             </div>
@@ -106,11 +101,9 @@ const Logo: React.FC = () => {
 
 interface DesktopNavProps {
   location: Location;
-  showServicesDropdown: boolean;
-  toggleServicesDropdown: () => void;
 }
 
-const DesktopNav: React.FC<DesktopNavProps> = ({ location, showServicesDropdown, toggleServicesDropdown }) => {
+const DesktopNav: React.FC<DesktopNavProps> = ({ location }) => {
   return (
     <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-8">
       {navItems.map((item, index) => (
@@ -123,11 +116,6 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ location, showServicesDropdown,
           isActive={location.pathname === item.link}
         />
       ))}
-      <ServicesDropdown
-        showServicesDropdown={showServicesDropdown}
-        toggleServicesDropdown={toggleServicesDropdown}
-        location={location}
-      />
     </div>
   );
 }
@@ -159,64 +147,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, text, icon, index, isActive }) =>
   );
 }
 
-interface ServicesDropdownProps {
-  showServicesDropdown: boolean;
-  toggleServicesDropdown: () => void;
-  location: { pathname: string };
-}
-
-const ServicesDropdown: React.FC<ServicesDropdownProps> = ({ showServicesDropdown, toggleServicesDropdown, location }) => {
-  return (
-    <div className="relative group">
-      <motion.button
-        className="flex items-center px-3 py-2 text-sm font-medium text-white rounded-md transition-colors duration-200 hover:text-amber-300 hover:bg-teal-600"
-        onClick={toggleServicesDropdown}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <Briefcase size={18} />
-        <span className="ml-2">Services</span>
-        <ChevronDown size={14} className="ml-1" />
-      </motion.button>
-      <AnimatePresence>
-        {showServicesDropdown && (
-          <motion.div
-            className="absolute right-0 mt-2 w-64 bg-white rounded-lg border border-gray-200 shadow-xl"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            {serviceItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.link}
-                className={`flex items-center px-4 py-3 text-sm transition-colors duration-200 ${location.pathname === item.link ? 'text-teal-600 bg-teal-50' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-600'
-                  }`}
-              >
-                {item.icon}
-                <span className="ml-2">{item.name}</span>
-              </Link>
-            ))}
-            <div className="px-4 py-2 text-sm font-medium text-gray-500 border-t border-gray-200">External Resources</div>
-            {externalResources.map((resource) => (
-              <a
-                key={resource.name}
-                href={resource.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center px-4 py-3 text-sm text-gray-700 transition-colors duration-200 hover:bg-teal-50 hover:text-teal-600"
-              >
-                <span className="mr-2">{resource.icon}</span>
-                {resource.name}
-              </a>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+// Services dropdown removed
 
 function MobileMenuToggle({ isOpen, toggleMenu }: { isOpen: boolean, toggleMenu: () => void }) {
   return (
@@ -254,15 +185,7 @@ function MobileMenu({ isOpen, location }: { isOpen: boolean, location: Location 
                 isActive={location.pathname === item.link}
               />
             ))}
-            {serviceItems.map((item) => (
-              <MobileNavItem
-                key={item.name}
-                to={item.link}
-                text={item.name}
-                icon={item.icon}
-                isActive={location.pathname === item.link}
-              />
-            ))}
+
             <div className="pt-4 mt-4 border-t border-teal-600">
               <p className="px-3 text-sm font-medium text-teal-200">External Resources</p>
               {externalResources.map((resource) => (

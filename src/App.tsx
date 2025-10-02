@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import Progress from './pages/Progress';
 import Resume from './pages/Resume';
 import Roadmap from './pages/Roadmap';
+import ExamPrep from './pages/ExamPrep';
 
 const App: React.FC = () => {
   return (
@@ -23,6 +24,7 @@ const App: React.FC = () => {
               <Route path="/progress" element={<Progress />} />
               <Route path="/resume" element={<Resume />} />
               <Route path="/roadmap" element={<Roadmap />} />
+              <Route path="/exam-prep" element={<ExamPrep />} />
 
               {/* Catch-all route for 404 */}
               <Route path="*" element={<Navigate to="/" replace />} />
