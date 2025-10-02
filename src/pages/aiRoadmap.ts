@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { marked } from 'marked';
 import JSON5 from 'json5';
-import _ from 'lodash';
 import getAIPrompt from './aiPrompt2';
 
 interface RoadmapStage {
@@ -29,9 +28,15 @@ const API_KEY = import.meta.env.VITE_API_KEY;
 const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 
 const extractJSONFromMarkdown = (markdown: string): string | null => {
-  const tokenizer = new marked.Tokenizer();
   const tokens = marked.lexer(markdown);
-  const codeBlocks = tokens.filter((token: any) => token.type === 'code' && token.lang === 'json');
+  const codeBlocks = tokens.filter((token: unknown) => 
+    typeof token === 'object' && 
+    token !== null && 
+    'type' in token && 
+    token.type === 'code' && 
+    'lang' in token && 
+    token.lang === 'json'
+  );
   return codeBlocks.length > 0 ? codeBlocks[0].text : null;
 };
 

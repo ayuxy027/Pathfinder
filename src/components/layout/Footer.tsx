@@ -8,14 +8,14 @@ interface SocialIcon {
   label: string;
 }
 
-interface FooterLink {
+interface FooterLinkData {
   label: string;
   href: string;
 }
 
-interface FooterColumn {
+interface FooterColumnData {
   title: string;
-  links: FooterLink[];
+  links: FooterLinkData[];
 }
 
 interface MeteorProps {
@@ -42,7 +42,7 @@ const socialIcons: SocialIcon[] = [
   { Icon: FaYoutube, href: '#', label: 'YouTube' },
 ];
 
-const footerLinks: FooterColumn[] = [
+const footerLinks: FooterColumnData[] = [
   {
     title: 'PathFinder',
     links: [

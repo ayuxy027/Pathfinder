@@ -1,4 +1,3 @@
-import React from 'react';
 import { FaChalkboardTeacher, FaBriefcase, FaUserGraduate, FaChartLine } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
@@ -61,7 +60,18 @@ const FeatureSection = () => {
   );
 };
 
-const FeatureCard = ({ feature, index }) => {
+type Feature = {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+};
+
+interface FeatureCardProps {
+  feature: Feature;
+  index: number;
+}
+
+const FeatureCard: React.FC<FeatureCardProps> = ({ feature, index }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}

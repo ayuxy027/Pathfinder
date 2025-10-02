@@ -8,7 +8,6 @@ import ErrorFallback from './components/shared/ErrorFallback';
 // Direct imports instead of lazy loading
 import Home from './pages/Home';
 import Progress from './pages/Progress';
-import Quiz from './pages/Quiz';
 import Resume from './pages/Resume';
 import Roadmap from './pages/Roadmap';
 
@@ -22,7 +21,6 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/progress" element={<Progress />} />
-              <Route path="/quiz" element={<Quiz />} />
               <Route path="/resume" element={<Resume />} />
               <Route path="/roadmap" element={<Roadmap />} />
 

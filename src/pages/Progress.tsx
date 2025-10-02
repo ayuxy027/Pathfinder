@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
-import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import { Bar, Line } from 'react-chartjs-2';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, BookOpen, Code, Link, Clock, Award, Calendar, BarChart2, Lightbulb, ChevronRight, Star, Users, Zap } from 'lucide-react';
-import { ProgressData } from '../types';
+import { Loader2, BookOpen, Code, Clock, Award, Calendar, BarChart2, Lightbulb, ChevronRight, Star, Users, Zap } from 'lucide-react';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -49,7 +48,7 @@ type ChartType = 'skills' | 'progress';
 type MetricType = 'weekly' | 'monthly' | 'yearly';
 
 const Progress: React.FC = () => {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth0();
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [activeChart, setActiveChart] = useState<ChartType>('skills');
@@ -109,7 +108,9 @@ const Progress: React.FC = () => {
           certificatesEarned: 3
         });
         setIsLoading(false);
-      } catch (err) {
+      } catch (_error) {
+        // _error is intentionally unused but caught for debugging purposes
+        console.error("Failed to load user progress data. Please try again later.", _error);
         setError("Failed to load user progress data. Please try again later.");
         setIsLoading(false);
       }

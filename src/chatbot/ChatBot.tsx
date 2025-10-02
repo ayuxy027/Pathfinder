@@ -1,11 +1,5 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChatMessage } from '../types'
-
-interface UseLocalStorageReturn<T> {
-  0: T;
-  1: (value: T) => void;
-}
 
 // Internal useLocalStorage hook
 const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: T) => void] => {
@@ -37,12 +31,12 @@ interface PromptOptions {
 // Internal AI Prompt Generator
 const getAIPrompt = (userInput: string, options: PromptOptions = { logErrors: false }): string => {
   // Helper: Validate input as a non-empty string
-  const isValidString = (str: any): str is string =>
+  const isValidString = (str: unknown): str is string =>
     typeof str === 'string' && str.trim().length > 0;
 
   // Helper: Sanitize input to prevent code injections
   const sanitizeInput = (input: string): string =>
-    input.replace(/[<>`"'{}]/g, '').trim();
+    input.replace(/[<>`" '{}]/g, '').trim();
 
   // Input Validation: Strict checks with specific error messages
   if (!isValidString(userInput)) {
@@ -260,18 +254,18 @@ const useSpeechSynthesis = () => {
     speechSynth.speak(utterance)
   }
 
-  const cancel = (): void => {
+  const cancel = useCallback((): void => {
     if (speechSynth) {
       setSpeaking(false)
       speechSynth.cancel()
     }
-  }
+  }, [speechSynth])
 
   useEffect(() => {
     return () => {
       cancel()
     }
-  }, [])
+  }, [cancel])
 
   return { speak, cancel, speaking }
 }
@@ -368,7 +362,7 @@ const useChatbot = () => {
     return () => {
       cancel() // Cleanup any ongoing speech when component unmounts
     }
-  }, [cancel])
+  }, [cancel]) // cancel function is stable, no need to include in dependencies
 
   return {
     messages,
@@ -413,7 +407,7 @@ const SimpleMarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =>
       .replace(/```([\s\S]*?)```/g, '<pre class="overflow-x-auto p-3 my-2 bg-gray-100 rounded-lg"><code class="text-sm">$1</code></pre>')
       .replace(/`(.*?)`/g, '<code class="px-1 py-0.5 text-sm bg-gray-100 rounded">$1</code>')
       // Lists
-      .replace(/^\- (.*$)/gm, '<li class="mb-1 ml-4">• $1</li>')
+      .replace(/^- (.*$)/gm, '<li class="mb-1 ml-4">• $1</li>')
       .replace(/^\d+\. (.*$)/gm, '<li class="mb-1 ml-4">$1</li>')
       // Line breaks
       .replace(/\n\n/g, '</p><p class="mb-2">')
@@ -577,7 +571,7 @@ const ThinkingIndicator = () => (
 )
 
 // Internal ChatMessages Component (with framer-motion animations)
-const ChatMessages = ({ messages, isLoading, handleCompletionCelebration }) => {
+const ChatMessages = ({ messages, handleCompletionCelebration }) => {
   return (
     <motion.div 
       className="overflow-y-auto flex-1 p-4 space-y-4 sm:p-6"

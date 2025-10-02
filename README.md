@@ -25,7 +25,6 @@ Discover tailored paths and seize opportunities for success
 - **Profession-Independent Path Guidance** 🌐
 - **Integrated Chatbot** for real-time query handling 🤖
 - **Resume Builder** for polished CVs 📄
-- **Quiz Generator** for knowledge testing 🧠
 - **Roadmap Generator** to outline personalized learning paths 🛤️
 - **Protected Routes** with strong focus on authentication 🔒
 - **Modern UI/UX Design** for a smooth and intuitive user experience ✨

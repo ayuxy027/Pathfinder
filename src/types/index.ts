@@ -7,31 +7,6 @@ export interface User {
   avatar?: string;
 }
 
-export interface QuizQuestion {
-  id: string;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-  explanation?: string;
-  difficulty?: 'easy' | 'medium' | 'hard';
-  category?: string;
-}
-
-export interface QuizResult {
-  id: string;
-  score: number;
-  totalQuestions: number;
-  timeSpent: number;
-  answers: UserAnswer[];
-  completedAt: Date;
-}
-
-export interface UserAnswer {
-  questionId: string;
-  selectedAnswer: number;
-  isCorrect: boolean;
-  timeSpent: number;
-}
 
 export interface RoadmapNode {
   id: string;
@@ -143,6 +118,8 @@ export interface ApiResponse<T> {
   message?: string;
   error?: string;
 }
+
+import React from 'react';
 
 // Component prop types
 export interface ButtonProps {

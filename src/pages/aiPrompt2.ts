@@ -9,7 +9,7 @@ const getAIPrompt = (
   options: PromptOptions = { logErrors: false }
 ): string => {
     // Helper: Validate input as non-empty strings
-    const isValidString = (str: any): str is string =>
+    const isValidString = (str: unknown): str is string =>
       typeof str === 'string' && str.trim().length > 0;
   
     // Helper: Sanitize inputs to prevent code injections (XSS, SQL injection, etc.)

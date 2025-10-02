@@ -1,10 +1,16 @@
 import React, { useEffect, useRef } from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { motion, useAnimation, Variants } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ChevronRight, GraduationCap, Target, Users, Sparkles, MessageSquare, FileText, Map, Brain, Briefcase, Award, Flag, Star, Settings, Heart, Code, Coffee } from 'lucide-react';
 
-// Add CSS animations for infinite scroll
-const scrollAnimations = `
+interface CardData {
+  icon: React.ComponentType<{ className?: string; size?: number }>;
+  title: string;
+  description: string;
+  color: string;
+}
+
+const SCROLL_ANIMATIONS = `
   @keyframes scroll-up {
     0% {
       transform: translateY(0);
@@ -32,7 +38,7 @@ const scrollAnimations = `
   }
 `;
 
-const cardDataLeft = [
+const cardDataLeft: CardData[] = [
   { icon: GraduationCap, title: "Learn", description: "Custom path", color: "#0D9488" },
   { icon: Target, title: "Focus", description: "Clear goals", color: "#0E7490" },
   { icon: Users, title: "Connect", description: "Build network", color: "#0369A1" },
@@ -45,7 +51,7 @@ const cardDataLeft = [
   { icon: Award, title: "Achieve", description: "Excellence", color: "#0D9488" }
 ];
 
-const cardDataRight = [
+const cardDataRight: CardData[] = [
   { icon: Flag, title: "Start", description: "Journey begins", color: "#0E7490" },
   { icon: Star, title: "Excel", description: "Stand out", color: "#0D9488" },
   { icon: Settings, title: "Adjust", description: "Fine tune", color: "#0369A1" },
@@ -58,9 +64,9 @@ const cardDataRight = [
   { icon: Sparkles, title: "Shine", description: "Be best", color: "#0E7490" }
 ];
 
-const cardVariants = {
+const cardVariants: Variants = {
   initial: { opacity: 0, y: 20, scale: 0.9 },
-  animate: (index) => ({
+  animate: (index: number) => ({
     opacity: 1,
     y: 0,
     scale: 1,
@@ -72,36 +78,49 @@ const cardVariants = {
   }),
 };
 
-const MarqueeColumn = React.memo(({ cards, isLeft }) => {
-  return (
-    <div className="overflow-hidden relative h-full">
-      <div
-        className={`flex flex-col gap-6 py-6 ${isLeft ? 'animate-scroll-up' : 'animate-scroll-down'}`}
-        style={{
-          animationDuration: '30s',
-          animationTimingFunction: 'linear',
-          animationIterationCount: 'infinite',
-        }}
-      >
-        {/* First set of cards */}
-        {cards.map((card, index) => (
-          <Card key={`first-${index}-${card.title}`} card={card} index={index} isLeft={isLeft} />
-        ))}
-        {/* Duplicate set for seamless loop */}
-        {cards.map((card, index) => (
-          <Card key={`second-${index}-${card.title}`} card={card} index={index} isLeft={isLeft} />
-        ))}
-      </div>
-    </div>
-  );
-});
+interface MarqueeColumnProps {
+  cards: CardData[];
+  isLeft: boolean;
+}
 
-const Card = React.memo(({ card, index, isLeft }) => {
-  const Icon = card.icon;
+const MarqueeColumn: React.FC<MarqueeColumnProps> = React.memo(({ cards, isLeft }) => (
+  <div className="overflow-hidden relative h-full">
+    <div
+      className={`flex flex-col gap-6 py-6 ${isLeft ? 'animate-scroll-up' : 'animate-scroll-down'}`}
+      style={{
+        animationDuration: '30s',
+        animationTimingFunction: 'linear',
+        animationIterationCount: 'infinite',
+      }}
+    >
+      {/* First set of cards */}
+      {cards.map((card, index) => (
+        <Card key={`first-${index}-${card.title}`} {...card} index={index} isLeft={isLeft} />
+      ))}
+      {/* Duplicate set for seamless loop */}
+      {cards.map((card, index) => (
+        <Card key={`second-${index}-${card.title}`} {...card} index={index} isLeft={isLeft} />
+      ))}
+    </div>
+  </div>
+));
+
+MarqueeColumn.displayName = 'MarqueeColumn';
+
+interface CardProps {
+  icon: React.ComponentType<{ className?: string; size?: number }>;
+  title: string;
+  description: string;
+  color: string;
+  index: number;
+  isLeft: boolean;
+}
+
+const Card: React.FC<CardProps> = React.memo(({ icon: Icon, title, description, color, index, isLeft }) => {
   const controls = useAnimation();
 
   useEffect(() => {
-    controls.start("animate");
+    controls.start('animate');
   }, [controls]);
 
   return (
@@ -113,8 +132,9 @@ const Card = React.memo(({ card, index, isLeft }) => {
       className="w-full transform-gpu"
     >
       <div
-        className={`p-4 transition-all duration-500 bg-white border shadow-lg rounded-xl backdrop-blur-lg border-teal-50
-          ${isLeft ? 'translate-x-2' : '-translate-x-2'}`}
+        className={`p-4 transition-all duration-500 bg-white border shadow-lg rounded-xl backdrop-blur-lg border-teal-50 ${
+          isLeft ? 'translate-x-2' : '-translate-x-2'
+        }`}
         style={{
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
           transform: `perspective(1000px) rotateY(${isLeft ? '5deg' : '-5deg'})`,
@@ -123,13 +143,13 @@ const Card = React.memo(({ card, index, isLeft }) => {
         <div className="flex items-center space-x-4">
           <div
             className="p-3 rounded-lg"
-            style={{ backgroundColor: `${card.color}15`, color: card.color }}
+            style={{ backgroundColor: `${color}15`, color }}
           >
             <Icon className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-base font-medium text-gray-800">{card.title}</h3>
-            <p className="text-sm text-gray-600">{card.description}</p>
+            <h3 className="text-base font-medium text-gray-800">{title}</h3>
+            <p className="text-sm text-gray-600">{description}</p>
           </div>
         </div>
       </div>
@@ -137,15 +157,18 @@ const Card = React.memo(({ card, index, isLeft }) => {
   );
 });
 
+Card.displayName = 'Card';
+
 const HeroSection: React.FC = () => {
-  // Inject CSS animations
   useEffect(() => {
     const styleElement = document.createElement('style');
-    styleElement.textContent = scrollAnimations;
+    styleElement.textContent = SCROLL_ANIMATIONS;
     document.head.appendChild(styleElement);
 
     return () => {
-      document.head.removeChild(styleElement);
+      if (document.head.contains(styleElement)) {
+        document.head.removeChild(styleElement);
+      }
     };
   }, []);
 
@@ -157,52 +180,31 @@ const HeroSection: React.FC = () => {
           <LeftContent />
           {/* Hide carousels on small/medium screens, show only on large screens */}
           <div className="relative hidden lg:grid grid-cols-2 gap-8 h-[700px]">
-            <MarqueeColumn
-              cards={cardDataLeft}
-              isLeft={true}
-            />
-            <MarqueeColumn
-              cards={cardDataRight}
-              isLeft={false}
-            />
+            <MarqueeColumn cards={cardDataLeft} isLeft={true} />
+            <MarqueeColumn cards={cardDataRight} isLeft={false} />
           </div>
         </div>
       </div>
     </section>
   );
-}
+};
 
 const BackgroundEffects: React.FC = () => {
-  const bgRef = useRef(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(bgRef.current.children, {
-        scale: 0,
-        opacity: 0,
-        duration: 2,
-        stagger: 0.3,
-        ease: "power3.out",
-      });
-    }, bgRef);
-
-    return () => ctx.revert();
-  }, []);
-
+  const bgRef = useRef<HTMLDivElement>(null);
   return (
     <div ref={bgRef} className="absolute inset-0 pointer-events-none">
       <div className="absolute top-0 left-0 w-[800px] h-[800px] rounded-full bg-teal-200/20 blur-3xl" />
       <div className="absolute bottom-0 right-0 w-[800px] h-[800px] rounded-full bg-teal-200/20 blur-3xl" />
     </div>
   );
-}
+};
 
 const LeftContent: React.FC = () => {
-  const contentRef = useRef(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(contentRef.current.children, {
+      gsap.from(contentRef.current?.children || [], {
         y: 50,
         opacity: 0,
         duration: 1.2,
@@ -236,6 +238,6 @@ const LeftContent: React.FC = () => {
       </div>
     </div>
   );
-}
+};
 
-export default HeroSection;
+export default React.memo(HeroSection);

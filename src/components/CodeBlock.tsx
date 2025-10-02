@@ -11,16 +11,16 @@ interface CodeBlockProps {
  * A simple code block component with syntax highlighting using CSS
  */
 const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'javascript', showLineNumbers = false }) => {
-  if (!code) return null;
-  
   // Convert language for CSS class (e.g., 'javascript' -> 'language-javascript')
   const languageClass = `language-${language}`;
   
   // Split code into lines for line numbers
-  const codeLines = code.split('\n');
+  const codeLines = useMemo(() => code ? code.split('\n') : [], [code]);
   
   // Simple syntax highlighting function
   const highlightedCode = useMemo((): string[] => {
+    if (!code) return [];
+    
     return codeLines.map((line: string): string => {
       // Very basic highlighting - in a real app you might want to use a tokenizer library
       // But for our purposes, we'll just use some basic regex
@@ -62,14 +62,16 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'javascript', sh
       
       return highlightedLine;
     });
-  }, [code, language]);
+  }, [codeLines, language, code]);
+  
+  if (!code) return null;
   
   return (
-    <div className="code-block-wrapper rounded-lg overflow-hidden font-mono text-sm">
+    <div className="overflow-hidden font-mono text-sm rounded-lg code-block-wrapper">
       <div className="flex">
         {/* Line numbers column */}
         {showLineNumbers && (
-          <div className="line-numbers py-3 px-2 text-right select-none bg-gray-800 text-gray-500">
+          <div className="px-2 py-3 text-right text-gray-500 bg-gray-800 select-none line-numbers">
             {codeLines.map((_, i) => (
               <div key={i} className="line-number">
                 {i + 1}
@@ -79,7 +81,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'javascript', sh
         )}
         
         {/* Code content */}
-        <pre className="flex-1 overflow-x-auto p-3 bg-gray-900 text-gray-200">
+        <pre className="overflow-x-auto flex-1 p-3 text-gray-200 bg-gray-900">
           <code className={languageClass}>
             {highlightedCode.map((line, i) => (
               <div key={i} className="code-line" dangerouslySetInnerHTML={{ __html: line || ' ' }} />
@@ -91,4 +93,4 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'javascript', sh
   );
 };
 
-export default CodeBlock; 
+export default CodeBlock;

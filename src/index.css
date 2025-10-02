@@ -1,1 +1,22 @@
 @import "tailwindcss";
+
+@theme {
+  --font-body: "Montserrat", sans-serif;
+
+  /* Gradients migrated from former tailwind.config.js backgroundImage */
+  --bg-proj: linear-gradient(to right, #0d9488, #06b6d4);
+  --bg-proj-hover: linear-gradient(to right, #0a6f6f, #0ea5e5);
+}
+
+/* Utilities replacing config-based classes for Tailwind v4 */
+@utility font-body {
+  font-family: var(--font-body);
+}
+
+@utility bg-proj {
+  background-image: var(--bg-proj);
+}
+
+@utility bg-proj-hover {
+  background-image: var(--bg-proj-hover);
+}

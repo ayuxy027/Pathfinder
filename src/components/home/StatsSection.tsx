@@ -67,7 +67,7 @@ const StatsSection = () => {
           }}
           className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5 lg:gap-12"
         >
-          {companyLogos.map((logo, index) => (
+          {companyLogos.map((logo) => (
             <motion.div
               key={logo.name}
               variants={{

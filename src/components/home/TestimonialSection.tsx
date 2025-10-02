@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { FaQuoteLeft, FaStar } from 'react-icons/fa';
 import { useInView } from 'react-intersection-observer';
@@ -62,20 +61,20 @@ const TestimonialSection = () => {
   ];
 
   return (
-    <section ref={ref} className="py-16 sm:py-20 lg:py-24 overflow-hidden bg-gradient-to-br from-teal-600 to-teal-800">
+    <section ref={ref} className="overflow-hidden py-16 bg-gradient-to-br from-teal-600 to-teal-800 sm:py-20 lg:py-24">
       <div className="relative px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-center mb-12 sm:mb-16 lg:mb-20"
+          className="mb-12 text-center sm:mb-16 lg:mb-20"
         >
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-medium leading-tight text-white mb-4">
+          <h2 className="mb-4 text-3xl font-medium leading-tight text-white sm:text-4xl lg:text-5xl">
             What Our{' '}
-            <span className="text-amber-400 font-medium">Users</span>{' '}
+            <span className="font-medium text-amber-400">Users</span>{' '}
             Say
           </h2>
-          <p className="text-lg text-teal-100 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-lg text-teal-100">
             Real stories from professionals who transformed their careers
           </p>
         </motion.div>
@@ -89,7 +88,7 @@ const TestimonialSection = () => {
   );
 };
 
-const TestimonialRow = ({ testimonials, direction }) => {
+const TestimonialRow = ({ testimonials, direction }: { testimonials: any, direction: string }) => {
   return (
     <motion.div
       className="flex gap-6 sm:gap-8"
@@ -105,26 +104,26 @@ const TestimonialRow = ({ testimonials, direction }) => {
         opacity: { duration: 0.8 }
       }}
     >
-      {testimonials.concat(testimonials, testimonials).map((testimonial, index) => (
+      {(testimonials as Array<any>).concat(testimonials, testimonials).map((testimonial: any, index: number) => (
         <TestimonialCard key={`${testimonial.name}-${index}`} testimonial={testimonial} />
       ))}
     </motion.div>
   );
 };
 
-const TestimonialCard = ({ testimonial }) => {
+const TestimonialCard = ({ testimonial }: { testimonial: any }) => {
   return (
     <motion.div
       whileHover={{ scale: 1.02, y: -5 }}
-      className="relative flex-shrink-0 p-6 overflow-hidden bg-white rounded-xl shadow-lg w-80 sm:w-96 group"
+      className="overflow-hidden relative flex-shrink-0 p-6 w-80 bg-white rounded-xl shadow-lg sm:w-96 group"
     >
-      <div className="absolute top-0 left-0 w-20 h-20 -translate-x-10 -translate-y-10 bg-teal-100 rounded-full opacity-30"></div>
-      <div className="absolute bottom-0 right-0 w-20 h-20 translate-x-10 translate-y-10 bg-amber-100 rounded-full opacity-30"></div>
+      <div className="absolute top-0 left-0 w-20 h-20 bg-teal-100 rounded-full opacity-30 -translate-x-10 -translate-y-10"></div>
+      <div className="absolute right-0 bottom-0 w-20 h-20 bg-amber-100 rounded-full opacity-30 translate-x-10 translate-y-10"></div>
 
       <FaQuoteLeft className="mb-4 text-3xl text-teal-600" />
-      <p className="mb-6 text-sm leading-relaxed text-gray-700 italic">{testimonial.content}</p>
+      <p className="mb-6 text-sm italic leading-relaxed text-gray-700">{testimonial.content}</p>
 
-      <div className="flex items-center gap-4">
+      <div className="flex gap-4 items-center">
         <img
           src={testimonial.image}
           alt={testimonial.name}

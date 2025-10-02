@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Briefcase, ChevronDown, Map, TrendingUp, Calendar, FileQuestion } from 'lucide-react';
+import { Menu, X, Briefcase, ChevronDown, Map, TrendingUp, Calendar } from 'lucide-react';
 import { Link, useLocation, Location } from 'react-router-dom';
 
-interface NavItem {
+interface NavItemData {
   name: string;
   link: string;
   icon: React.ReactNode;
@@ -15,14 +15,13 @@ interface ExternalResource {
   icon: string;
 }
 
-const navItems: NavItem[] = [
+const navItems: NavItemData[] = [
   { name: 'Roadmap Generation', link: '/roadmap', icon: <Map size={18} /> },
   { name: 'My Progress', link: '/progress', icon: <TrendingUp size={18} /> },
   { name: 'Build Your Resume', link: '/resume', icon: <Calendar size={18} /> }
 ];
 
-const serviceItems: NavItem[] = [
-  { name: 'Take A Quiz', link: '/quiz', icon: <FileQuestion size={18} /> },
+const serviceItems: NavItemData[] = [
 ];
 
 const externalResources: ExternalResource[] = [
@@ -92,7 +91,7 @@ const Logo: React.FC = () => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
-        <motion.h1 
+        <motion.h1
           className="text-xl font-medium text-white sm:text-2xl lg:text-3xl"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -115,17 +114,17 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ location, showServicesDropdown,
   return (
     <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-8">
       {navItems.map((item, index) => (
-        <NavItem 
-          key={item.name} 
-          to={item.link} 
-          text={item.name} 
+        <NavItem
+          key={item.name}
+          to={item.link}
+          text={item.name}
           icon={item.icon}
           index={index}
           isActive={location.pathname === item.link}
         />
       ))}
-      <ServicesDropdown 
-        showServicesDropdown={showServicesDropdown} 
+      <ServicesDropdown
+        showServicesDropdown={showServicesDropdown}
         toggleServicesDropdown={toggleServicesDropdown}
         location={location}
       />
@@ -145,7 +144,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, text, icon, index, isActive }) =>
   return (
     <motion.div
       className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${isActive ? 'text-amber-400 bg-teal-600' : 'text-white hover:text-amber-300 hover:bg-teal-600'
-      }`}
+        }`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       initial={{ opacity: 0, y: -20 }}
@@ -160,11 +159,17 @@ const NavItem: React.FC<NavItemProps> = ({ to, text, icon, index, isActive }) =>
   );
 }
 
-function ServicesDropdown({ showServicesDropdown, toggleServicesDropdown, location }) {
+interface ServicesDropdownProps {
+  showServicesDropdown: boolean;
+  toggleServicesDropdown: () => void;
+  location: { pathname: string };
+}
+
+const ServicesDropdown: React.FC<ServicesDropdownProps> = ({ showServicesDropdown, toggleServicesDropdown, location }) => {
   return (
     <div className="relative group">
       <motion.button
-        className="flex items-center px-3 py-2 text-sm font-medium text-white rounded-md hover:text-amber-300 hover:bg-teal-600 transition-colors duration-200"
+        className="flex items-center px-3 py-2 text-sm font-medium text-white rounded-md transition-colors duration-200 hover:text-amber-300 hover:bg-teal-600"
         onClick={toggleServicesDropdown}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -176,7 +181,7 @@ function ServicesDropdown({ showServicesDropdown, toggleServicesDropdown, locati
       <AnimatePresence>
         {showServicesDropdown && (
           <motion.div
-            className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200"
+            className="absolute right-0 mt-2 w-64 bg-white rounded-lg border border-gray-200 shadow-xl"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -187,7 +192,7 @@ function ServicesDropdown({ showServicesDropdown, toggleServicesDropdown, locati
                 key={item.name}
                 to={item.link}
                 className={`flex items-center px-4 py-3 text-sm transition-colors duration-200 ${location.pathname === item.link ? 'text-teal-600 bg-teal-50' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-600'
-                }`}
+                  }`}
               >
                 {item.icon}
                 <span className="ml-2">{item.name}</span>
@@ -200,7 +205,7 @@ function ServicesDropdown({ showServicesDropdown, toggleServicesDropdown, locati
                 href={resource.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-600 transition-colors duration-200"
+                className="flex items-center px-4 py-3 text-sm text-gray-700 transition-colors duration-200 hover:bg-teal-50 hover:text-teal-600"
               >
                 <span className="mr-2">{resource.icon}</span>
                 {resource.name}
@@ -213,7 +218,7 @@ function ServicesDropdown({ showServicesDropdown, toggleServicesDropdown, locati
   );
 }
 
-function MobileMenuToggle({ isOpen, toggleMenu }) {
+function MobileMenuToggle({ isOpen, toggleMenu }: { isOpen: boolean, toggleMenu: () => void }) {
   return (
     <motion.button
       onClick={toggleMenu}
@@ -228,7 +233,7 @@ function MobileMenuToggle({ isOpen, toggleMenu }) {
   );
 }
 
-function MobileMenu({ isOpen, location }) {
+function MobileMenu({ isOpen, location }: { isOpen: boolean, location: Location }) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -241,18 +246,18 @@ function MobileMenu({ isOpen, location }) {
         >
           <div className="px-2 pt-2 pb-3 space-y-1">
             {navItems.map((item) => (
-              <MobileNavItem 
-                key={item.name} 
-                to={item.link} 
+              <MobileNavItem
+                key={item.name}
+                to={item.link}
                 text={item.name}
                 icon={item.icon}
                 isActive={location.pathname === item.link}
               />
             ))}
             {serviceItems.map((item) => (
-              <MobileNavItem 
-                key={item.name} 
-                to={item.link} 
+              <MobileNavItem
+                key={item.name}
+                to={item.link}
                 text={item.name}
                 icon={item.icon}
                 isActive={location.pathname === item.link}
@@ -266,7 +271,7 @@ function MobileMenu({ isOpen, location }) {
                   href={resource.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center px-3 py-2 text-sm text-white hover:bg-teal-600 transition-colors duration-200"
+                  className="flex items-center px-3 py-2 text-sm text-white transition-colors duration-200 hover:bg-teal-600"
                 >
                   <span className="mr-2">{resource.icon}</span>
                   {resource.name}
@@ -280,7 +285,7 @@ function MobileMenu({ isOpen, location }) {
   );
 }
 
-function MobileNavItem({ to, text, icon, isActive }) {
+function MobileNavItem({ to, text, icon, isActive }: { to: string, text: string, icon: React.ReactNode, isActive: boolean }) {
   return (
     <motion.div
       className="block overflow-hidden rounded-md"
@@ -288,9 +293,9 @@ function MobileNavItem({ to, text, icon, isActive }) {
       whileTap={{ scale: 0.98 }}
     >
       <Link to={to} className="block">
-        <motion.div 
+        <motion.div
           className={`px-3 py-2 text-sm font-medium transition-all duration-200 ${isActive ? 'text-amber-400 bg-teal-600' : 'text-white hover:bg-teal-600'
-          }`}
+            }`}
           whileHover={{ x: 5 }}
           transition={{ duration: 0.2 }}
         >
