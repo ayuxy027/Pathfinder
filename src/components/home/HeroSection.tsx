@@ -1,38 +1,14 @@
-import React, { useEffect, useRef } from 'react';
-import { motion, useAnimation } from 'framer-motion';
-import { gsap } from 'gsap';
+import { motion } from 'framer-motion';
 import { ChevronRight, GraduationCap, Target, Users, Sparkles, MessageSquare, FileText, Map, Brain, Briefcase, Award, Flag, Star, Settings, Heart, Code, Coffee } from 'lucide-react';
 
-// Add CSS animations for infinite scroll
-const scrollAnimations = `
-  @keyframes scroll-up {
-    0% {
-      transform: translateY(0);
-    }
-    100% {
-      transform: translateY(-50%);
-    }
-  }
-  
-  @keyframes scroll-down {
-    0% {
-      transform: translateY(-50%);
-    }
-    100% {
-      transform: translateY(0);
-    }
-  }
-  
-  .animate-scroll-up {
-    animation: scroll-up 30s linear infinite;
-  }
-  
-  .animate-scroll-down {
-    animation: scroll-down 30s linear infinite;
-  }
-`;
+interface CardData {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  color: string;
+}
 
-const cardDataLeft = [
+const cardDataLeft: CardData[] = [
   { icon: GraduationCap, title: "Learn", description: "Custom path", color: "#0D9488" },
   { icon: Target, title: "Focus", description: "Clear goals", color: "#0E7490" },
   { icon: Users, title: "Connect", description: "Build network", color: "#0369A1" },
@@ -45,7 +21,7 @@ const cardDataLeft = [
   { icon: Award, title: "Achieve", description: "Excellence", color: "#0D9488" }
 ];
 
-const cardDataRight = [
+const cardDataRight: CardData[] = [
   { icon: Flag, title: "Start", description: "Journey begins", color: "#0E7490" },
   { icon: Star, title: "Excel", description: "Stand out", color: "#0D9488" },
   { icon: Settings, title: "Adjust", description: "Fine tune", color: "#0369A1" },
@@ -60,64 +36,60 @@ const cardDataRight = [
 
 const cardVariants = {
   initial: { opacity: 0, y: 20, scale: 0.9 },
-  animate: (index) => ({
+  animate: (index: number) => ({
     opacity: 1,
     y: 0,
     scale: 1,
     transition: {
       duration: 0.6,
       delay: index * 0.1,
-      ease: [0.43, 0.13, 0.23, 0.96],
+      ease: [0.43, 0.13, 0.23, 0.96] as [number, number, number, number],
     },
   }),
 };
 
-const MarqueeColumn = React.memo(({ cards, isLeft }) => {
+interface MarqueeColumnProps {
+  cards: CardData[];
+  isLeft: boolean;
+}
+
+function MarqueeColumn({ cards, isLeft }: MarqueeColumnProps) {
   return (
     <div className="overflow-hidden relative h-full">
-      <div
-        className={`flex flex-col gap-6 py-6 ${isLeft ? 'animate-scroll-up' : 'animate-scroll-down'}`}
-        style={{
-          animationDuration: '30s',
-          animationTimingFunction: 'linear',
-          animationIterationCount: 'infinite',
-        }}
-      >
-        {/* First set of cards */}
+      <div className={`flex flex-col gap-6 py-6 ${isLeft ? 'animate-scroll-up' : 'animate-scroll-down'}`}>
         {cards.map((card, index) => (
           <Card key={`first-${index}-${card.title}`} card={card} index={index} isLeft={isLeft} />
         ))}
-        {/* Duplicate set for seamless loop */}
         {cards.map((card, index) => (
           <Card key={`second-${index}-${card.title}`} card={card} index={index} isLeft={isLeft} />
         ))}
       </div>
     </div>
   );
-});
+}
 
-const Card = React.memo(({ card, index, isLeft }) => {
+interface CardProps {
+  card: CardData;
+  index: number;
+  isLeft: boolean;
+}
+
+function Card({ card, index, isLeft }: CardProps) {
   const Icon = card.icon;
-  const controls = useAnimation();
-
-  useEffect(() => {
-    controls.start("animate");
-  }, [controls]);
 
   return (
     <motion.div
       custom={index}
       variants={cardVariants}
       initial="initial"
-      animate={controls}
+      animate="animate"
       className="w-full transform-gpu"
     >
       <div
-        className={`p-4 transition-all duration-500 bg-white border shadow-lg rounded-xl backdrop-blur-lg border-teal-50
-          ${isLeft ? 'translate-x-2' : '-translate-x-2'}`}
+        className="p-4 transition-all duration-500 bg-white border shadow-lg rounded-xl backdrop-blur-lg border-teal-50"
         style={{
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-          transform: `perspective(1000px) rotateY(${isLeft ? '5deg' : '-5deg'})`,
+          transform: `perspective(1000px) rotateY(${isLeft ? '5deg' : '-5deg'}) ${isLeft ? 'translateX(0.5rem)' : 'translateX(-0.5rem)'}`,
         }}
       >
         <div className="flex items-center space-x-4">
@@ -135,36 +107,18 @@ const Card = React.memo(({ card, index, isLeft }) => {
       </div>
     </motion.div>
   );
-});
+}
 
-const HeroSection: React.FC = () => {
-  // Inject CSS animations
-  useEffect(() => {
-    const styleElement = document.createElement('style');
-    styleElement.textContent = scrollAnimations;
-    document.head.appendChild(styleElement);
-
-    return () => {
-      document.head.removeChild(styleElement);
-    };
-  }, []);
-
+export default function HeroSection() {
   return (
     <section className="overflow-hidden relative bg-gradient-to-br from-white to-teal-50">
       <BackgroundEffects />
       <div className="relative px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-12 items-center py-12 lg:grid-cols-2">
           <LeftContent />
-          {/* Hide carousels on small/medium screens, show only on large screens */}
           <div className="relative hidden lg:grid grid-cols-2 gap-8 h-[700px]">
-            <MarqueeColumn
-              cards={cardDataLeft}
-              isLeft={true}
-            />
-            <MarqueeColumn
-              cards={cardDataRight}
-              isLeft={false}
-            />
+            <MarqueeColumn cards={cardDataLeft} isLeft={true} />
+            <MarqueeColumn cards={cardDataRight} isLeft={false} />
           </div>
         </div>
       </div>
@@ -172,50 +126,18 @@ const HeroSection: React.FC = () => {
   );
 }
 
-const BackgroundEffects: React.FC = () => {
-  const bgRef = useRef(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(bgRef.current.children, {
-        scale: 0,
-        opacity: 0,
-        duration: 2,
-        stagger: 0.3,
-        ease: "power3.out",
-      });
-    }, bgRef);
-
-    return () => ctx.revert();
-  }, []);
-
+function BackgroundEffects() {
   return (
-    <div ref={bgRef} className="absolute inset-0 pointer-events-none">
+    <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
       <div className="absolute top-0 left-0 w-[800px] h-[800px] rounded-full bg-teal-200/20 blur-3xl" />
       <div className="absolute bottom-0 right-0 w-[800px] h-[800px] rounded-full bg-teal-200/20 blur-3xl" />
     </div>
   );
 }
 
-const LeftContent: React.FC = () => {
-  const contentRef = useRef(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(contentRef.current.children, {
-        y: 50,
-        opacity: 0,
-        duration: 1.2,
-        stagger: 0.3,
-        ease: "power4.out",
-      });
-    }, contentRef);
-
-    return () => ctx.revert();
-  }, []);
-
+function LeftContent() {
   return (
-    <div ref={contentRef} className="relative z-10">
+    <div className="relative z-10">
       <h1 className="text-4xl font-medium leading-tight lg:text-5xl xl:text-6xl">
         <span className="text-teal-600">Navigate Your Career</span>
         <br />
@@ -229,13 +151,14 @@ const LeftContent: React.FC = () => {
       </p>
 
       <div className="mt-8 sm:mt-10">
-        <button className="flex items-center px-8 py-3 text-base font-medium text-white bg-teal-600 rounded-full transition-all transform sm:text-lg hover:bg-teal-700 hover:scale-105 group">
+        <a
+          href="/roadmap"
+          className="inline-flex items-center px-8 py-3 text-base font-medium text-white bg-teal-600 rounded-full transition-all transform sm:text-lg hover:bg-teal-700 hover:scale-105 group focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+        >
           Get Started
-          <ChevronRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-        </button>
+          <ChevronRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+        </a>
       </div>
     </div>
   );
 }
-
-export default HeroSection;

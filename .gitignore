@@ -11,13 +11,14 @@ yarn-error.log*
 
 # OS generated files
 .DS_Store
-.DS_Store          # macOS
-Thumbs.db          # Windows
-ehthumbs.db        # Windows
-Desktop.ini        # Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
 # IDEs and text editors
-.vscode/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 .idea/
 *.code-workspace
 *.suo
@@ -52,13 +53,13 @@ out/
 
 # Environment variables
 .env
+.env*.local
 
-# Package manager lock files
+# Package manager lock files (keep package-lock.json for reproducibility)
 yarn.lock
 .pnp.*
 .yarn-integrity
 pnpm-lock.yaml
-package-lock.json
 
 # Testing artifacts
 *.lcov
@@ -78,4 +79,3 @@ bower_components/
 .terraform/
 .resources/_gen/
 .vercel
-.env*.local

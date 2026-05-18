@@ -1,15 +1,9 @@
-import React, { useState, useRef } from 'react';
-import _ from 'lodash';
-import { getAIResponse } from './aiRoadmap';
+import { useState, useRef, useCallback, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Loader2, FileText, BookOpen, Link as LinkIcon, Code, Users, 
-  Lightbulb, ChevronRight, Download, Save, Plus, X, Edit,
-  Clipboard, CheckCircle, HelpCircle, PanelLeftOpen, Tag, Trash2
+import {
+  Loader2, FileText, BookOpen, Link as LinkIcon, Code, Users,
+  Lightbulb, ChevronRight, Download, Save, Plus, X, CheckCircle, HelpCircle, PanelLeftOpen, Tag, Trash2
 } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import { RoadmapNode, Resource } from '../types';
 
 interface ProfessionTemplate {
   name: string;
@@ -52,7 +46,6 @@ interface TooltipProps {
   content: string;
 }
 
-// Common profession templates to help users get started quickly
 const PROFESSION_TEMPLATES: ProfessionTemplate[] = [
   { name: 'Software Developer', goals: ['Frontend', 'Backend', 'Full-Stack', 'DevOps', 'Mobile'] },
   { name: 'Data Scientist', goals: ['Machine Learning', 'Big Data', 'NLP', 'Computer Vision', 'Analytics'] },
@@ -61,7 +54,6 @@ const PROFESSION_TEMPLATES: ProfessionTemplate[] = [
   { name: 'Marketing Professional', goals: ['Digital Marketing', 'Content Marketing', 'SEO', 'Social Media', 'Analytics'] }
 ];
 
-// Sample goal templates that can be quickly inserted
 const GOAL_TEMPLATES: string[] = [
   'Advance to a senior position in my field',
   'Transition to a leadership role',
@@ -71,7 +63,6 @@ const GOAL_TEMPLATES: string[] = [
   'Develop skills for remote work opportunities'
 ];
 
-// Default skill categories to help users
 const DEFAULT_SKILL_CATEGORIES: string[] = [
   'Technical Skills',
   'Soft Skills',
@@ -82,181 +73,275 @@ const DEFAULT_SKILL_CATEGORIES: string[] = [
   'Project Management'
 ];
 
-const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
-  const [isVisible, setIsVisible] = useState<boolean>(false);
-  
+function Tooltip({ children, content }: TooltipProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const tooltipId = useId();
+
   return (
-    <div className="inline-flex relative items-center" 
-         onMouseEnter={() => setIsVisible(true)} 
-         onMouseLeave={() => setIsVisible(false)}>
+    <div className="inline-flex relative items-center"
+      onMouseEnter={() => setIsVisible(true)}
+      onMouseLeave={() => setIsVisible(false)}
+      onFocusCapture={() => setIsVisible(true)}
+      onBlurCapture={() => setIsVisible(false)}
+      tabIndex={0}
+      aria-describedby={isVisible ? tooltipId : undefined}
+    >
       {children}
       {isVisible && (
-        <div className="absolute z-10 p-2 text-xs text-white rounded shadow-lg bg-gray-700/90 -top-8 min-w-[200px]">
+        <div id={tooltipId} role="tooltip" className="absolute z-10 p-2 text-xs text-white rounded shadow-lg bg-gray-700/90 -top-8 min-w-[200px]">
           {content}
         </div>
       )}
     </div>
   );
-};
+}
 
-const Roadmap: React.FC = () => {
-  const [profession, setProfession] = useState<string>('');
-  const [userInput, setUserInput] = useState<string>('');
+function isValidUrl(url: string): boolean {
+  return /^https?:\/\//.test(url);
+}
+
+function isValidSavedRoadmap(item: unknown): item is SavedRoadmap {
+  if (typeof item !== 'object' || item === null) return false;
+  const r = item as Record<string, unknown>;
+  if (typeof r.id !== 'number') return false;
+  if (typeof r.date !== 'string') return false;
+  if (typeof r.profession !== 'string') return false;
+  if (typeof r.goal !== 'string') return false;
+  if (typeof r.data !== 'object' || r.data === null) return false;
+  const d = r.data as Record<string, unknown>;
+  if (!Array.isArray(d.roadmap)) return false;
+  if (!Array.isArray(d.flashcards)) return false;
+  return true;
+}
+
+function generateMockRoadmap(profession: string, skillSections: string[]): RoadmapData {
+  const stages: RoadmapStage[] = [
+    {
+      stage: 'Foundation',
+      description: `Build core fundamentals for ${profession}.`,
+      skills: ['Problem Solving', 'Communication', 'Basic Tools'].concat(skillSections.slice(0, 2)),
+      resources: [
+        { name: 'Coursera Fundamentals', type: 'Course', link: 'https://coursera.org' },
+        { name: 'MDN Web Docs', type: 'Website', link: 'https://developer.mozilla.org' }
+      ]
+    },
+    {
+      stage: 'Intermediate',
+      description: `Develop specialized skills for ${profession}.`,
+      skills: ['Advanced Concepts', 'Team Collaboration', 'Project Management'].concat(skillSections.slice(2, 4)),
+      resources: [
+        { name: 'Udemy Advanced Course', type: 'Course', link: 'https://udemy.com' },
+        { name: 'Industry Blogs', type: 'Website', link: 'https://medium.com' }
+      ]
+    },
+    {
+      stage: 'Advanced',
+      description: `Master complex topics in ${profession}.`,
+      skills: ['Architecture', 'Mentorship', 'Strategic Thinking'].concat(skillSections.slice(4)),
+      resources: [
+        { name: 'Advanced Certification', type: 'Course', link: 'https://coursera.org' },
+        { name: 'Conference Talks', type: 'Website', link: 'https://youtube.com' }
+      ]
+    },
+    {
+      stage: 'Expert',
+      description: `Lead and innovate in ${profession}.`,
+      skills: ['Leadership', 'Innovation', 'Industry Influence'],
+      resources: [
+        { name: 'Leadership Program', type: 'Course', link: 'https://linkedin.com/learning' },
+        { name: 'Research Papers', type: 'Website', link: 'https://arxiv.org' }
+      ]
+    }
+  ];
+
+  const flashcards: Flashcard[] = [
+    { question: `What is the most important skill for a ${profession}?`, answer: 'Continuous learning and adaptability.' },
+    { question: `How do you stay updated in ${profession}?`, answer: 'Follow industry blogs, attend conferences, and practice regularly.' },
+    { question: `What makes a great ${profession}?`, answer: 'Technical excellence combined with strong soft skills.' },
+    { question: `How to handle challenges in ${profession}?`, answer: 'Break problems down, seek mentorship, and iterate solutions.' }
+  ];
+
+  return { roadmap: stages, flashcards };
+}
+
+export default function Roadmap() {
+  const [profession, setProfession] = useState('');
+  const [userInput, setUserInput] = useState('');
   const [roadmapData, setRoadmapData] = useState<RoadmapData | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showTemplates, setShowTemplates] = useState<boolean>(false);
+  const [showTemplates, setShowTemplates] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ProfessionTemplate | null>(null);
   const [savedRoadmaps, setSavedRoadmaps] = useState<SavedRoadmap[]>(() => {
-    const saved = localStorage.getItem('savedRoadmaps');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('savedRoadmaps');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed.filter(isValidSavedRoadmap);
+      }
+    } catch {
+      // ignore invalid localStorage
+    }
+    return [];
   });
-  const [isCopied, setIsCopied] = useState<boolean>(false);
-  const roadmapRef = useRef<HTMLDivElement>(null);
-  
-  // Custom skill sections state
+  const [isCopied, setIsCopied] = useState(false);
   const [skillSections, setSkillSections] = useState<string[]>([]);
-  const [newSectionName, setNewSectionName] = useState<string>('');
-  const [showSectionInput, setShowSectionInput] = useState<boolean>(false);
+  const [newSectionName, setNewSectionName] = useState('');
+  const [showSectionInput, setShowSectionInput] = useState(false);
+  const roadmapRef = useRef<HTMLDivElement>(null);
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setRoadmapData(null);
 
     try {
-      // Pass the skill sections to the AI prompt
-      const response = await getAIResponse(userInput, profession, skillSections);
-      console.log('Parsed API response:', response);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const response = generateMockRoadmap(profession || 'General', skillSections);
 
       if (!response || !response.roadmap || !response.flashcards) {
-        throw new Error('Incomplete or invalid data received from AI');
+        throw new Error('Incomplete or invalid data received');
       }
       if (!Array.isArray(response.roadmap) || !Array.isArray(response.flashcards)) {
-        throw new Error('Invalid data format: roadmap or flashcards is not an array');
+        throw new Error('Invalid data format');
       }
 
       setRoadmapData(response);
-    } catch (error) {
-      console.error('Error generating roadmap:', error);
-      setError(error.message || 'An unexpected error occurred while generating the roadmap.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [profession, skillSections]);
 
-  const getResourceIcon = (type?: string): React.ReactNode => {
+  const getResourceIcon = (type?: string) => {
     switch (type?.toLowerCase()) {
-      case 'book': return <BookOpen className="mr-2 w-4 h-4 text-teal-600" />;
-      case 'course': return <Code className="mr-2 w-4 h-4 text-purple-600" />;
-      case 'website': return <LinkIcon className="mr-2 w-4 h-4 text-blue-600" />;
-      case 'tool': return <Users className="mr-2 w-4 h-4 text-orange-600" />; 
-      case 'conference': return <Users className="mr-2 w-4 h-4 text-red-600" />;
-      default: return <FileText className="mr-2 w-4 h-4 text-gray-500" />;
+      case 'book': return <BookOpen className="mr-2 w-4 h-4 text-teal-600" aria-hidden="true" />;
+      case 'course': return <Code className="mr-2 w-4 h-4 text-purple-600" aria-hidden="true" />;
+      case 'website': return <LinkIcon className="mr-2 w-4 h-4 text-blue-600" aria-hidden="true" />;
+      case 'tool': return <Users className="mr-2 w-4 h-4 text-orange-600" aria-hidden="true" />;
+      case 'conference': return <Users className="mr-2 w-4 h-4 text-red-600" aria-hidden="true" />;
+      default: return <FileText className="mr-2 w-4 h-4 text-gray-500" aria-hidden="true" />;
     }
   };
 
-  const selectProfessionTemplate = (template: ProfessionTemplate): void => {
+  const selectProfessionTemplate = useCallback((template: ProfessionTemplate) => {
     setProfession(template.name);
     setSelectedTemplate(template);
     setShowTemplates(false);
-  };
+  }, []);
 
-  const insertGoal = (goal: string): void => {
+  const insertGoal = useCallback((goal: string) => {
     setUserInput(goal);
-  };
+  }, []);
 
-  const addSkillSection = (): void => {
+  const addSkillSection = useCallback(() => {
     if (newSectionName.trim() !== '') {
-      setSkillSections([...skillSections, newSectionName.trim()]);
+      setSkillSections(prev => [...prev, newSectionName.trim()]);
       setNewSectionName('');
       setShowSectionInput(false);
     }
-  };
+  }, [newSectionName]);
 
-  const removeSkillSection = (index: number): void => {
-    const updatedSections = [...skillSections];
-    updatedSections.splice(index, 1);
-    setSkillSections(updatedSections);
-  };
+  const removeSkillSection = useCallback((index: number) => {
+    setSkillSections(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
-  const addDefaultSkillSection = (section: string): void => {
-    if (!skillSections.includes(section)) {
-      setSkillSections([...skillSections, section]);
-    }
-  };
+  const addDefaultSkillSection = useCallback((section: string) => {
+    setSkillSections(prev => {
+      if (prev.includes(section)) return prev;
+      return [...prev, section];
+    });
+  }, []);
 
-  const saveRoadmap = (): void => {
+  const saveRoadmap = useCallback(() => {
     if (!roadmapData || !profession) return;
-    
+
     const newSavedRoadmap: SavedRoadmap = {
-      id: Date.now(),
+      id: Date.now() + Math.random(),
       date: new Date().toLocaleDateString(),
       profession,
       goal: userInput,
       data: roadmapData
     };
-    
-    const updatedRoadmaps = [...savedRoadmaps, newSavedRoadmap];
-    setSavedRoadmaps(updatedRoadmaps);
-    localStorage.setItem('savedRoadmaps', JSON.stringify(updatedRoadmaps));
-    
-    // Show feedback
-    alert('Roadmap saved successfully!');
-  };
 
-  const loadRoadmap = (savedRoadmap: SavedRoadmap): void => {
+    setSavedRoadmaps(prev => {
+      const updated = [...prev, newSavedRoadmap];
+      try {
+        localStorage.setItem('savedRoadmaps', JSON.stringify(updated));
+      } catch {
+        // ignore quota errors
+      }
+      return updated;
+    });
+  }, [roadmapData, profession, userInput]);
+
+  const loadRoadmap = useCallback((savedRoadmap: SavedRoadmap) => {
     setProfession(savedRoadmap.profession);
     setUserInput(savedRoadmap.goal);
     setRoadmapData(savedRoadmap.data);
-  };
+  }, []);
 
-  const deleteSavedRoadmap = (id: number): void => {
-    const updatedRoadmaps = savedRoadmaps.filter(roadmap => roadmap.id !== id);
-    setSavedRoadmaps(updatedRoadmaps);
-    localStorage.setItem('savedRoadmaps', JSON.stringify(updatedRoadmaps));
-  };
+  const deleteSavedRoadmap = useCallback((id: number) => {
+    setSavedRoadmaps(prev => {
+      const updated = prev.filter(roadmap => roadmap.id !== id);
+      try {
+        localStorage.setItem('savedRoadmaps', JSON.stringify(updated));
+      } catch {
+        // ignore quota errors
+      }
+      return updated;
+    });
+  }, []);
 
-  const copyToClipboard = (): void => {
+  const copyToClipboard = useCallback(() => {
     if (!roadmapData) return;
-    
-    const text = `Career Roadmap for ${profession}\nGoal: ${userInput}\n\n` + 
-      roadmapData.roadmap.map((stage, i) => 
-        `STAGE ${i+1}: ${stage.stage}\n${stage.description}\n\nSkills:\n` + 
-        stage.skills.map(skill => `- ${skill}`).join('\n') + 
-        `\n\nResources:\n` + 
+
+    const text = `Career Roadmap for ${profession}\nGoal: ${userInput}\n\n` +
+      roadmapData.roadmap.map((stage, i) =>
+        `STAGE ${i + 1}: ${stage.stage}\n${stage.description}\n\nSkills:\n` +
+        stage.skills.map(skill => `- ${skill}`).join('\n') +
+        `\n\nResources:\n` +
         stage.resources.map(res => `- ${res.name} (${res.type}): ${res.link}`).join('\n')
       ).join('\n\n');
-    
+
     navigator.clipboard.writeText(text).then(() => {
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     });
-  };
+  }, [roadmapData, profession, userInput]);
 
-  const exportToPDF = async (): Promise<void> => {
+  const exportToPDF = useCallback(async () => {
     if (!roadmapRef.current) return;
-    
-    const canvas = await html2canvas(roadmapRef.current);
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-    
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`roadmap_${profession.replace(/\s+/g, '_').toLowerCase()}.pdf`);
-  };
+    try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf')
+      ]);
+      const canvas = await html2canvas(roadmapRef.current);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`roadmap_${profession.replace(/\s+/g, '_').toLowerCase()}.pdf`);
+    } catch {
+      setError('Failed to export PDF. Please try again.');
+    }
+  }, [profession]);
 
   return (
-    <motion.div 
+    <motion.div
       className="container px-4 py-10 mx-auto max-w-5xl font-sans bg-gradient-to-br from-stone-50 to-white min-h-screen"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
-      <motion.h1 
+      <motion.h1
         className="mb-8 text-3xl font-bold tracking-tight text-center text-transparent bg-clip-text bg-gradient-to-r from-teal-700 to-teal-500 sm:text-4xl lg:text-5xl"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -267,23 +352,22 @@ const Roadmap: React.FC = () => {
           Create your personalized path to success
         </span>
       </motion.h1>
-      
-      {/* Saved Roadmaps Section with enhanced styling */}
+
       {savedRoadmaps.length > 0 && (
-        <motion.div 
+        <motion.div
           className="p-6 mb-8 bg-white rounded-xl border shadow-md border-stone-200/70 backdrop-blur-sm"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <details>
             <summary className="flex items-center text-sm font-medium text-teal-700 cursor-pointer hover:text-teal-600">
-              <PanelLeftOpen className="mr-2 w-4 h-4" />
+              <PanelLeftOpen className="mr-2 w-4 h-4" aria-hidden="true" />
               Your Saved Roadmaps ({savedRoadmaps.length})
             </summary>
             <div className="mt-4 space-y-3">
               {savedRoadmaps.map(roadmap => (
-                <motion.div 
-                  key={roadmap.id} 
+                <motion.div
+                  key={roadmap.id}
                   className="flex justify-between items-center p-4 rounded-lg border border-stone-200/70 bg-stone-50/50 hover:bg-stone-50 transition-all duration-200"
                   whileHover={{ scale: 1.01 }}
                 >
@@ -293,21 +377,23 @@ const Roadmap: React.FC = () => {
                     <div className="text-xs text-stone-400">Saved on {roadmap.date}</div>
                   </div>
                   <div className="flex space-x-2">
-                    <motion.button 
+                    <motion.button
                       onClick={() => loadRoadmap(roadmap)}
                       className="p-2 text-teal-600 rounded-lg transition-colors hover:bg-teal-50"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
+                      aria-label="Load roadmap"
                     >
-                      <FileText size={16} />
+                      <FileText size={16} aria-hidden="true" />
                     </motion.button>
-                    <motion.button 
+                    <motion.button
                       onClick={() => deleteSavedRoadmap(roadmap.id)}
                       className="p-2 text-rose-500 rounded-lg transition-colors hover:bg-rose-50"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
+                      aria-label="Delete roadmap"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={16} aria-hidden="true" />
                     </motion.button>
                   </div>
                 </motion.div>
@@ -316,9 +402,9 @@ const Roadmap: React.FC = () => {
           </details>
         </motion.div>
       )}
-      
-      <motion.form 
-        onSubmit={handleSubmit} 
+
+      <motion.form
+        onSubmit={handleSubmit}
         className="p-8 mb-12 space-y-6 bg-white rounded-xl border shadow-md border-stone-200/70 backdrop-blur-sm"
         initial={{ scale: 0.98, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -329,13 +415,14 @@ const Roadmap: React.FC = () => {
             <label htmlFor="profession" className="block mb-2 text-sm font-medium text-stone-700">
               Your Profession:
               <Tooltip content="Enter your current role or the profession you're interested in">
-                <HelpCircle className="inline-block ml-1 w-3.5 h-3.5 text-stone-400" />
+                <HelpCircle className="inline-block ml-1 w-3.5 h-3.5 text-stone-400" aria-hidden="true" />
               </Tooltip>
             </label>
-            <button 
+            <button
               type="button"
               className="px-2 py-1 text-xs font-medium text-teal-700 rounded-md transition-colors bg-teal-50/70 hover:bg-teal-100/80"
               onClick={() => setShowTemplates(!showTemplates)}
+              aria-expanded={showTemplates}
             >
               {showTemplates ? 'Hide Templates' : 'Browse Templates'}
             </button>
@@ -352,16 +439,17 @@ const Roadmap: React.FC = () => {
             />
             <AnimatePresence>
               {showTemplates && (
-                <motion.div 
+                <motion.div
                   className="overflow-y-auto absolute z-10 p-2 mt-1 w-full max-h-48 bg-white rounded-md border shadow-md border-stone-200"
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -5 }}
                 >
                   {PROFESSION_TEMPLATES.map(template => (
-                    <div 
+                    <button
+                      type="button"
                       key={template.name}
-                      className="p-2 rounded-md cursor-pointer hover:bg-stone-50"
+                      className="block p-2 w-full text-left rounded-md hover:bg-stone-50"
                       onClick={() => selectProfessionTemplate(template)}
                     >
                       <div className="text-sm font-medium text-stone-800">{template.name}</div>
@@ -377,7 +465,7 @@ const Roadmap: React.FC = () => {
                           </span>
                         )}
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </motion.div>
               )}
@@ -389,7 +477,7 @@ const Roadmap: React.FC = () => {
           <label htmlFor="userInput" className="block mb-2 text-sm font-medium text-stone-700">
             What are your career goals or areas of focus?
             <Tooltip content="Describe what you want to achieve or learn about your career path">
-              <HelpCircle className="inline-block ml-1 w-3.5 h-3.5 text-stone-400" />
+              <HelpCircle className="inline-block ml-1 w-3.5 h-3.5 text-stone-400" aria-hidden="true" />
             </Tooltip>
           </label>
           <textarea
@@ -397,11 +485,11 @@ const Roadmap: React.FC = () => {
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             className="px-3 py-2.5 w-full text-sm rounded-lg border shadow-sm transition duration-150 ease-in-out border-stone-200 focus:ring-1 focus:ring-teal-400 focus:border-teal-400 focus:outline-none"
-            rows="3"
+            rows={3}
             required
             placeholder="e.g., 'Transition into AI/ML', 'Become a senior frontend developer', 'Improve project management skills'"
-          ></textarea>
-          
+          />
+
           <div className="mt-2">
             <p className="mb-1 text-xs font-medium text-stone-500">Quick templates:</p>
             <div className="flex flex-wrap gap-2">
@@ -418,35 +506,33 @@ const Roadmap: React.FC = () => {
             </div>
           </div>
         </div>
-        
-        {/* Skill Section Input */}
+
         <div>
           <div className="flex justify-between items-center mb-2">
-            <label className="text-sm font-medium text-stone-700">
+            <span className="text-sm font-medium text-stone-700">
               Skill Categories You Want Included
               <Tooltip content="Add specific skill categories you'd like to see in your roadmap">
-                <HelpCircle className="inline-block ml-1 w-3.5 h-3.5 text-stone-400" />
+                <HelpCircle className="inline-block ml-1 w-3.5 h-3.5 text-stone-400" aria-hidden="true" />
               </Tooltip>
-            </label>
+            </span>
           </div>
-          
-          {/* Custom skill sections list */}
+
           <div className="flex flex-wrap gap-2 items-center mb-2">
             {skillSections.map((section, index) => (
-              <div key={index} className="flex items-center px-2 py-1 text-xs text-teal-700 bg-teal-50 rounded-md">
-                <Tag size={12} className="mr-1" />
+              <div key={`${section}-${index}`} className="flex items-center px-2 py-1 text-xs text-teal-700 bg-teal-50 rounded-md">
+                <Tag size={12} className="mr-1" aria-hidden="true" />
                 {section}
                 <button
                   type="button"
                   onClick={() => removeSkillSection(index)}
                   className="ml-1.5 text-teal-500 hover:text-teal-700"
+                  aria-label={`Remove ${section}`}
                 >
-                  <X size={12} />
+                  <X size={12} aria-hidden="true" />
                 </button>
               </div>
             ))}
-            
-            {/* Add section button or input field */}
+
             {showSectionInput ? (
               <div className="flex items-center">
                 <input
@@ -470,12 +556,11 @@ const Roadmap: React.FC = () => {
                 onClick={() => setShowSectionInput(true)}
                 className="flex items-center px-2 py-1 text-xs text-teal-600 bg-teal-50 rounded-md transition-colors hover:bg-teal-100"
               >
-                <Plus size={12} className="mr-1" /> Add Category
+                <Plus size={12} className="mr-1" aria-hidden="true" /> Add Category
               </button>
             )}
           </div>
-          
-          {/* Suggested skill categories */}
+
           <div className="mt-2">
             <p className="mb-1 text-xs font-medium text-stone-500">Suggested categories:</p>
             <div className="flex flex-wrap gap-1">
@@ -497,9 +582,9 @@ const Roadmap: React.FC = () => {
             </div>
           </div>
         </div>
-        
-        <motion.button 
-          type="submit" 
+
+        <motion.button
+          type="submit"
           className={`w-full flex justify-center items-center px-4 py-2.5 text-sm font-medium text-white transition duration-300 ease-in-out rounded-lg shadow-sm ${loading ? 'bg-stone-400 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500'}`}
           disabled={loading}
           whileHover={{ scale: loading ? 1 : 1.01 }}
@@ -507,7 +592,7 @@ const Roadmap: React.FC = () => {
         >
           {loading ? (
             <>
-              <Loader2 className="mr-2 w-4 h-4 animate-spin" /> Generating...
+              <Loader2 className="mr-2 w-4 h-4 animate-spin" aria-hidden="true" /> Generating...
             </>
           ) : 'Generate Roadmap'}
         </motion.button>
@@ -515,11 +600,12 @@ const Roadmap: React.FC = () => {
 
       <AnimatePresence>
         {error && (
-          <motion.div 
+          <motion.div
             className="p-4 mb-8 text-sm text-red-800 bg-red-50 rounded-lg border-red-200 shadow-sm border-l-4"
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
+            role="alert"
           >
             <p className="font-medium">Error:</p>
             <p>{error}</p>
@@ -529,7 +615,7 @@ const Roadmap: React.FC = () => {
 
       <AnimatePresence>
         {roadmapData && (
-          <motion.div 
+          <motion.div
             className="space-y-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -537,7 +623,7 @@ const Roadmap: React.FC = () => {
             ref={roadmapRef}
           >
             <div className="flex flex-col gap-3 justify-between items-center mb-5 sm:flex-row">
-              <motion.h2 
+              <motion.h2
                 className="text-2xl font-medium text-center text-transparent bg-clip-text bg-gradient-to-r from-teal-700 to-teal-500 sm:text-2xl"
                 initial={{ y: -10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -545,7 +631,7 @@ const Roadmap: React.FC = () => {
               >
                 Your Personalized Career Roadmap
               </motion.h2>
-              
+
               <div className="flex space-x-2">
                 <Tooltip content="Save this roadmap for future reference">
                   <motion.button
@@ -554,10 +640,10 @@ const Roadmap: React.FC = () => {
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <Save className="mr-1 w-3.5 h-3.5" /> Save
+                    <Save className="mr-1 w-3.5 h-3.5" aria-hidden="true" /> Save
                   </motion.button>
                 </Tooltip>
-                
+
                 <Tooltip content="Copy roadmap text to clipboard">
                   <motion.button
                     onClick={copyToClipboard}
@@ -566,13 +652,13 @@ const Roadmap: React.FC = () => {
                     whileTap={{ scale: 0.97 }}
                   >
                     {isCopied ? (
-                      <><CheckCircle className="mr-1 w-3.5 h-3.5" /> Copied!</>
+                      <><CheckCircle className="mr-1 w-3.5 h-3.5" aria-hidden="true" /> Copied!</>
                     ) : (
-                      <><Clipboard className="mr-1 w-3.5 h-3.5" /> Copy</>
+                      <><FileText className="mr-1 w-3.5 h-3.5" aria-hidden="true" /> Copy</>
                     )}
                   </motion.button>
                 </Tooltip>
-                
+
                 <Tooltip content="Export as PDF">
                   <motion.button
                     onClick={exportToPDF}
@@ -580,91 +666,100 @@ const Roadmap: React.FC = () => {
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <Download className="mr-1 w-3.5 h-3.5" /> Export
+                    <Download className="mr-1 w-3.5 h-3.5" aria-hidden="true" /> Export
                   </motion.button>
                 </Tooltip>
               </div>
             </div>
-            
-            {/* Roadmap Stages */}
+
             <div className="space-y-5">
               {roadmapData.roadmap?.map((stage, index) => (
-                <motion.div 
-                  key={index} 
+                <motion.div
+                  key={index}
                   className="overflow-hidden bg-white rounded-lg border shadow-sm transition-shadow duration-200 border-stone-100 hover:shadow-md"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 + index * 0.08 }}
                 >
                   <div className="p-4 bg-gradient-to-r from-teal-50/70 to-blue-50/50">
-                     <h3 className="flex items-center mb-1 text-base font-medium text-transparent bg-clip-text bg-gradient-to-r from-teal-700 to-blue-600 sm:text-lg">
-                       <span className="flex justify-center items-center mr-2 w-6 h-6 text-sm font-medium text-white rounded-full bg-teal-600/90">{index + 1}</span> {stage.stage || `Stage ${index + 1}`}
-                     </h3>
+                    <h3 className="flex items-center mb-1 text-base font-medium text-transparent bg-clip-text bg-gradient-to-r from-teal-700 to-blue-600 sm:text-lg">
+                      <span className="flex justify-center items-center mr-2 w-6 h-6 text-sm font-medium text-white rounded-full bg-teal-600/90">{index + 1}</span> {stage.stage || `Stage ${index + 1}`}
+                    </h3>
                   </div>
                   <div className="p-4 space-y-3 text-sm">
                     <p className="text-stone-600">{stage.description || 'No description provided.'}</p>
-                    
+
                     {stage.skills && stage.skills.length > 0 && (
                       <div>
-                        <h4 className="flex items-center mb-1 text-sm font-medium text-teal-700"><Lightbulb className="mr-1.5 w-4 h-4"/>Skills to Develop:</h4>
+                        <h4 className="flex items-center mb-1 text-sm font-medium text-teal-700">
+                          <Lightbulb className="mr-1.5 w-4 h-4" aria-hidden="true" />
+                          Skills to Develop:
+                        </h4>
                         <ul className="space-y-1 text-stone-600">
                           {stage.skills.map((skill, skillIndex) => (
-                            <li key={skillIndex} className="flex items-center"><ChevronRight className="flex-shrink-0 mr-1 w-3.5 h-3.5 text-teal-500"/>{skill}</li>
+                            <li key={skillIndex} className="flex items-center">
+                              <ChevronRight className="flex-shrink-0 mr-1 w-3.5 h-3.5 text-teal-500" aria-hidden="true" />
+                              {skill}
+                            </li>
                           ))}
                         </ul>
                       </div>
                     )}
-                    
+
                     {stage.resources && stage.resources.length > 0 && (
-                       <div>
-                         <h4 className="flex items-center mb-1 text-sm font-medium text-teal-700"><BookOpen className="mr-1.5 w-4 h-4"/>Recommended Resources:</h4>
-                         <ul className="space-y-1.5 text-stone-600">
-                           {stage.resources.map((resource, resourceIndex) => (
-                             <li key={resourceIndex} className="flex items-center">
-                               {getResourceIcon(resource.type)}
-                               <a 
-                                 href={resource.link || '#'} 
-                                 target="_blank" 
-                                 rel="noopener noreferrer" 
-                                 className="text-blue-600 transition-colors duration-200 hover:text-blue-800 hover:underline"
-                               >
-                                 {resource.name || 'Unnamed Resource'} {resource.type ? `(${resource.type})` : ''}
-                               </a>
-                             </li>
-                           ))}
-                         </ul>
-                       </div>
+                      <div>
+                        <h4 className="flex items-center mb-1 text-sm font-medium text-teal-700">
+                          <BookOpen className="mr-1.5 w-4 h-4" aria-hidden="true" />
+                          Recommended Resources:
+                        </h4>
+                        <ul className="space-y-1.5 text-stone-600">
+                          {stage.resources.map((resource, resourceIndex) => (
+                            <li key={resourceIndex} className="flex items-center">
+                              {getResourceIcon(resource.type)}
+                              <a
+                                href={isValidUrl(resource.link) ? resource.link : '#'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 transition-colors duration-200 hover:text-blue-800 hover:underline"
+                              >
+                                {resource.name || 'Unnamed Resource'} {resource.type ? `(${resource.type})` : ''}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
                   </div>
                 </motion.div>
               ))}
             </div>
 
-            {/* Flashcards Section */}
             {roadmapData.flashcards && roadmapData.flashcards.length > 0 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 + (roadmapData.roadmap?.length || 0) * 0.08 }}
               >
-                <h2 className="mt-12 mb-5 text-xl font-medium text-center text-transparent bg-clip-text bg-gradient-to-r from-teal-700 to-teal-500 sm:text-2xl">Key Concept Flashcards</h2>
+                <h2 className="mt-12 mb-5 text-xl font-medium text-center text-transparent bg-clip-text bg-gradient-to-r from-teal-700 to-teal-500 sm:text-2xl">
+                  Key Concept Flashcards
+                </h2>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {roadmapData.flashcards.map((flashcard, index) => (
-                    <motion.div 
-                      key={index} 
+                    <motion.div
+                      key={index}
                       className="p-4 space-y-2 text-sm bg-white rounded-lg border shadow-sm transition-shadow duration-200 border-stone-100 hover:shadow-md"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.4 + (roadmapData.roadmap?.length || 0) * 0.08 + index * 0.04 }}
                     >
                       <div>
-                         <h3 className="mb-1 text-xs font-medium tracking-wide text-teal-600 uppercase">Question:</h3>
-                         <p className="text-stone-700">{flashcard.question || 'No question provided.'}</p>
+                        <h3 className="mb-1 text-xs font-medium tracking-wide text-teal-600 uppercase">Question:</h3>
+                        <p className="text-stone-700">{flashcard.question || 'No question provided.'}</p>
                       </div>
-                       <hr className="border-stone-100"/>
+                      <hr className="border-stone-100" />
                       <div>
-                         <h3 className="mb-1 text-xs font-medium tracking-wide text-teal-600 uppercase">Answer:</h3>
-                         <p className="text-stone-500">{flashcard.answer || 'No answer provided.'}</p>
+                        <h3 className="mb-1 text-xs font-medium tracking-wide text-teal-600 uppercase">Answer:</h3>
+                        <p className="text-stone-500">{flashcard.answer || 'No answer provided.'}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -676,6 +771,4 @@ const Roadmap: React.FC = () => {
       </AnimatePresence>
     </motion.div>
   );
-};
-
-export default Roadmap;
+}

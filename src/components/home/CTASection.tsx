@@ -1,53 +1,22 @@
-import React, { useEffect, useRef } from 'react';
-import { motion, useAnimation } from 'framer-motion';
-import { FaUserGraduate } from 'react-icons/fa';
+import { useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const GlowingButton = () => {
-  const buttonRef = useRef(null);
-  const glowAnimation = useAnimation();
+export default function CTASection() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const animateGlow = async () => {
-      await glowAnimation.start({
-        boxShadow: [
-          '0 0 5px #f59e0b, 0 0 10px #f59e0b',
-          '0 0 8px #fbbf24, 0 0 15px #fbbf24',
-          '0 0 5px #f59e0b, 0 0 10px #f59e0b',
-        ],
-        transition: { duration: 3, ease: 'easeInOut', repeat: Infinity },
-      });
-    };
-    animateGlow();
-  }, [glowAnimation]);
+  const handleClick = useCallback(() => {
+    navigate('/roadmap');
+  }, [navigate]);
 
-  const handleClick = () => {
-    navigate('/consult');
-  };
-
-  return (
-    <motion.button
-      ref={buttonRef}
-      animate={glowAnimation}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      onClick={handleClick}
-      className="flex justify-center items-center px-6 py-3 text-base font-medium text-black bg-amber-400 rounded-full shadow-lg transition-all duration-300 sm:px-8 sm:py-4 lg:px-10 lg:py-4 sm:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-300 hover:bg-amber-500 hover:shadow-xl"
-    >
-      <FaUserGraduate className="mr-2 text-base sm:mr-3 sm:text-lg lg:text-xl" />
-      Get Career Guidance
-    </motion.button>
-  );
-};
-
-const EnhancedCTASection: React.FC = () => {
   return (
     <section className="overflow-hidden relative py-16 bg-gradient-to-br from-teal-50 to-white sm:py-20 lg:py-24">
       <div className="relative z-10 px-4 mx-auto max-w-7xl text-center sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.8 }}
           className="mb-8 sm:mb-12"
         >
@@ -58,7 +27,8 @@ const EnhancedCTASection: React.FC = () => {
           </h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mx-auto max-w-2xl text-lg text-gray-600 sm:text-xl"
           >
@@ -68,15 +38,23 @@ const EnhancedCTASection: React.FC = () => {
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4 }}
           className="flex justify-center"
         >
-          <GlowingButton />
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleClick}
+            className="flex justify-center items-center px-6 py-3 text-base font-medium text-black bg-amber-400 rounded-full shadow-lg transition-all duration-300 sm:px-8 sm:py-4 lg:px-10 lg:py-4 sm:text-lg lg:text-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-amber-300 hover:bg-amber-500 hover:shadow-xl"
+          >
+            <GraduationCap className="mr-2 text-base sm:mr-3 sm:text-lg lg:text-xl" aria-hidden="true" />
+            Get Career Guidance
+          </motion.button>
         </motion.div>
       </div>
     </section>
   );
-};
-
-export default EnhancedCTASection;
+}

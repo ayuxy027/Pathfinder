@@ -1,21 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
-import confetti from 'canvas-confetti';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Loader2, 
-  ChevronRight, 
-  Award, 
-  Clock, 
-  Brain, 
-  Zap, 
-  Flame, 
-  BarChart2, 
+import {
+  Loader2,
+  ChevronRight,
+  Award,
+  Clock,
+  Brain,
+  Zap,
+  Flame,
+  BarChart2,
   Lightbulb,
   AlertCircle
 } from 'lucide-react';
-import { generateQuizQuestions, generateMockQuestions } from '../services/quizService';
-import CodeBlock from '../components/CodeBlock';
-import { QuizQuestion } from '../types';
+import { generateMockQuestions } from '@/services/quizService';
+import CodeBlock from '@/components/CodeBlock';
+import type { QuizQuestion } from '@/types';
 
 interface QuizTopic {
   id: string;
@@ -45,138 +44,162 @@ const DIFFICULTY_LEVELS: DifficultyLevel[] = [
   { id: 'advanced', name: 'Advanced', color: 'bg-red-500' },
 ];
 
-const Quiz: React.FC = () => {
+const PARTICLE_COUNT = 8;
+const PARTICLE_COLORS = ['#0D9488', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6', '#10B981'];
+
+export default function Quiz() {
   const [screen, setScreen] = useState<ScreenType>('config');
   const [topic, setTopic] = useState<string>('javascript');
   const [difficulty, setDifficulty] = useState<string>('intermediate');
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [score, setScore] = useState<number>(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | string | null>(null);
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(30);
   const [streak, setStreak] = useState<number>(0);
   const [highestStreak, setHighestStreak] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState<boolean>(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [celebration, setCelebration] = useState<boolean>(false);
+  const celebrationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const answeredRef = useRef<boolean>(false);
+  const streakRef = useRef<number>(0);
+  const highestStreakRef = useRef<number>(0);
 
-  useEffect(() => {
-    if (screen === 'quiz' && !showExplanation && !selectedAnswer) {
-      timerRef.current = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) handleTimeout();
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(timerRef.current);
-    }
-  }, [screen, showExplanation, selectedAnswer]);
-
-  const handleTimeout = (): void => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
+  const handleTimeout = useCallback((): void => {
+    if (answeredRef.current) return;
+    answeredRef.current = true;
     setSelectedAnswer('TIMEOUT');
-    setIsCorrect(false);
     setShowExplanation(true);
     setStreak(0);
-  };
+    streakRef.current = 0;
+  }, []);
 
-  const handleAnswerClick = (answer: number): void => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    const correct = answer === questions[currentQuestionIndex].correctAnswer;
+  useEffect(() => {
+    if (screen !== 'quiz' || showExplanation || selectedAnswer) return;
+    answeredRef.current = false;
+    let elapsed = 0;
+    const timer = setInterval(() => {
+      elapsed += 1;
+      const next = 30 - elapsed;
+      setTimeLeft(next >= 0 ? next : 0);
+      if (elapsed >= 30) {
+        clearInterval(timer);
+        if (!answeredRef.current) {
+          answeredRef.current = true;
+          handleTimeout();
+        }
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [screen, currentQuestionIndex, showExplanation, selectedAnswer, handleTimeout]);
+
+
+  const clearQuestionState = useCallback((): void => {
+    setSelectedAnswer(null);
+    setShowExplanation(false);
+    setTimeLeft(30);
+    answeredRef.current = false;
+  }, []);
+
+  const handleAnswerClick = useCallback((answer: string): void => {
+    if (answeredRef.current) return;
+    answeredRef.current = true;
+    const currentQuestion = questions[currentQuestionIndex];
+    if (!currentQuestion) return;
+    const correct = answer === currentQuestion.correctAnswer;
     setSelectedAnswer(answer);
-    setIsCorrect(correct);
     setShowExplanation(true);
-    
     if (correct) {
       setScore(s => s + 1);
-      setStreak(s => {
-        const newStreak = s + 1;
-        if (newStreak > highestStreak) setHighestStreak(newStreak);
-        return newStreak;
-      });
-      if (timeLeft > 20) confetti({ particleCount: 30, spread: 70 });
+      streakRef.current += 1;
+      setStreak(streakRef.current);
+      if (streakRef.current > highestStreakRef.current) {
+        highestStreakRef.current = streakRef.current;
+        setHighestStreak(streakRef.current);
+      }
+      if (timeLeft > 20) {
+        setCelebration(true);
+        if (celebrationTimeoutRef.current) clearTimeout(celebrationTimeoutRef.current);
+        celebrationTimeoutRef.current = setTimeout(() => setCelebration(false), 1000);
+      }
     } else {
+      streakRef.current = 0;
       setStreak(0);
     }
-  };
+  }, [questions, currentQuestionIndex, timeLeft]);
 
-  const startQuiz = async (): Promise<void> => {
+  const startQuiz = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
     setScore(0);
     setStreak(0);
+    setHighestStreak(0);
+    streakRef.current = 0;
+    highestStreakRef.current = 0;
     setCurrentQuestionIndex(0);
-    
+    clearQuestionState();
+    setCelebration(false);
     try {
-      // Check if API key exists
-      const apiKey = import.meta.env.VITE_API_KEY;
-      if (!apiKey) {
-        console.error('Missing Gemini API key. Please add VITE_API_KEY to your .env file');
-        setError('Missing API key. Please check README-QUIZ.md for setup instructions.');
-        setIsLoading(false);
-        return;
-      }
-      
-      console.log(`Generating ${difficulty} level questions for ${topic}...`);
-      const generatedQuestions = await generateQuizQuestions(topic, difficulty);
-      
-      if (generatedQuestions && generatedQuestions.length > 0) {
-        console.log(`Successfully generated ${generatedQuestions.length} questions`);
-        setQuestions(generatedQuestions);
-        setScreen('quiz');
-      } else {
-        throw new Error('No questions were generated');
-      }
-    } catch (err) {
-      console.error('Error starting quiz:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      setError(`${errorMessage}. Please try again or select a different topic.`);
-      
-      // Try with mock questions as a UI fallback
-      console.log('Using mock questions as UI fallback');
       const mockQuestions = generateMockQuestions(topic, difficulty);
       if (mockQuestions.length > 0) {
         setQuestions(mockQuestions);
         setScreen('quiz');
+      } else {
+        setError('No questions were generated. Please try again or select a different topic.');
       }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(`${errorMessage}. Please try again or select a different topic.`);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [topic, difficulty, clearQuestionState]);
 
-  const nextQuestion = (): void => {
+  const nextQuestion = useCallback((): void => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(i => i + 1);
-      resetQuestionState();
+      clearQuestionState();
     } else {
       setScreen('result');
-      if (score === questions.length) confetti({ particleCount: 100, spread: 70 });
+      if (score >= questions.length && questions.length > 0) {
+        setCelebration(true);
+        if (celebrationTimeoutRef.current) clearTimeout(celebrationTimeoutRef.current);
+        celebrationTimeoutRef.current = setTimeout(() => setCelebration(false), 2000);
+      }
     }
-  };
+  }, [currentQuestionIndex, questions.length, clearQuestionState, score]);
 
-  const resetQuestionState = (): void => {
-    setSelectedAnswer(null);
-    setIsCorrect(null);
-    setTimeLeft(30);
-    setShowExplanation(false);
-  };
-
-  const restartQuiz = (): void => {
+  const restartQuiz = useCallback((): void => {
     setScreen('config');
-  };
+    setScore(0);
+    setStreak(0);
+    setHighestStreak(0);
+    streakRef.current = 0;
+    highestStreakRef.current = 0;
+    setCurrentQuestionIndex(0);
+    setQuestions([]);
+    setError(null);
+    clearQuestionState();
+    setCelebration(false);
+  }, [clearQuestionState]);
 
-  // Loading state
+  const particles = useMemo(() => {
+    return Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
+      left: 30 + ((i * 17 + 3) % 40),
+      top: 30 + ((i * 41 + 7) % 40),
+      dx: (((i * 23 + 11) % 100) - 50) * 4,
+      dy: (((i * 37 + 19) % 100) - 50) * 4,
+      color: PARTICLE_COLORS[i % PARTICLE_COLORS.length],
+    }));
+  }, []);
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-stone-50">
         <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="w-12 h-12 text-teal-600 animate-spin" />
+          <Loader2 className="w-12 h-12 text-teal-600 animate-spin" aria-hidden="true" />
           <p className="text-lg font-medium text-stone-700">
             Generating {difficulty} level {topic} questions...
           </p>
@@ -185,10 +208,12 @@ const Quiz: React.FC = () => {
     );
   }
 
+  const currentQuestion = questions[currentQuestionIndex];
+
   return (
     <div className="p-4 min-h-screen bg-stone-50">
       <div className="container mx-auto max-w-4xl">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -215,25 +240,27 @@ const Quiz: React.FC = () => {
               className="p-6 bg-white rounded-xl border shadow-md border-stone-100"
             >
               <h2 className="flex items-center mb-6 text-2xl font-bold">
-                <Brain className="mr-2 text-teal-500" /> Quiz Setup
+                <Brain className="mr-2 text-teal-500" aria-hidden="true" /> Quiz Setup
               </h2>
-              
+
               <div className="mb-6">
                 <label className="block mb-3 font-medium">Topic</label>
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-5" role="radiogroup" aria-label="Select quiz topic">
                   {QUIZ_TOPICS.map(t => (
                     <motion.button
                       key={t.id}
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setTopic(t.id)}
+                      role="radio"
+                      aria-checked={topic === t.id}
                       className={`p-4 rounded-lg flex flex-col items-center transition-colors ${
-                        topic === t.id 
-                          ? 'bg-teal-100 border-2 border-teal-300' 
+                        topic === t.id
+                          ? 'bg-teal-100 border-2 border-teal-300'
                           : 'bg-stone-50 hover:bg-stone-100'
                       }`}
                     >
-                      <span className="mb-2 text-2xl">{t.icon}</span>
+                      <span className="mb-2 text-2xl" aria-hidden="true">{t.icon}</span>
                       <span className="font-medium">{t.name}</span>
                     </motion.button>
                   ))}
@@ -242,16 +269,18 @@ const Quiz: React.FC = () => {
 
               <div className="mb-8">
                 <label className="block mb-3 font-medium">Difficulty</label>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Select difficulty level">
                   {DIFFICULTY_LEVELS.map(d => (
                     <motion.button
                       key={d.id}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setDifficulty(d.id)}
+                      role="radio"
+                      aria-checked={difficulty === d.id}
                       className={`px-5 py-2.5 rounded-lg font-medium transition-colors ${
-                        difficulty === d.id 
-                          ? `${d.color} text-white` 
+                        difficulty === d.id
+                          ? `${d.color} text-white`
                           : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       }`}
                     >
@@ -262,8 +291,8 @@ const Quiz: React.FC = () => {
               </div>
 
               {error && (
-                <div className="flex items-center p-3 mb-4 text-red-600 bg-red-50 rounded-lg">
-                  <AlertCircle className="mr-2" size={18} />
+                <div className="flex items-center p-3 mb-4 text-red-600 bg-red-50 rounded-lg" role="alert">
+                  <AlertCircle className="mr-2" size={18} aria-hidden="true" />
                   {error}
                 </div>
               )}
@@ -280,7 +309,7 @@ const Quiz: React.FC = () => {
             </motion.div>
           )}
 
-          {screen === 'quiz' && questions.length > 0 && (
+          {screen === 'quiz' && currentQuestion && (
             <motion.div
               key="quiz"
               initial={{ opacity: 0, y: 20 }}
@@ -293,22 +322,22 @@ const Quiz: React.FC = () => {
                 <div className="flex flex-col gap-2 justify-between items-center mb-6 md:flex-row">
                   <div className="flex gap-4 items-center p-2 w-full rounded-lg bg-stone-50 md:w-auto">
                     <div className="flex items-center text-stone-700">
-                      <Award className="mr-1.5 text-teal-500" size={18} />
+                      <Award className="mr-1.5 text-teal-500" size={18} aria-hidden="true" />
                       <span className="font-medium">{score} pts</span>
                     </div>
-                    <div className="h-5 border-r border-stone-300"></div>
+                    <div className="h-5 border-r border-stone-300" aria-hidden="true" />
                     <div className="flex items-center text-stone-700">
-                      <Flame className="mr-1.5 text-orange-500" size={18} />
+                      <Flame className="mr-1.5 text-orange-500" size={18} aria-hidden="true" />
                       <span className="font-medium">{streak} streak</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-3 items-center p-2 w-full rounded-lg bg-stone-50 md:w-auto">
                     <div className="flex items-center text-stone-700">
-                      <Clock className={`mr-1.5 ${timeLeft < 10 ? 'text-red-500' : 'text-teal-500'}`} size={18} />
+                      <Clock className={`mr-1.5 ${timeLeft < 10 ? 'text-red-500' : 'text-teal-500'}`} size={18} aria-hidden="true" />
                       <span className={`font-medium ${timeLeft < 10 ? 'text-red-500' : ''}`}>{timeLeft}s</span>
                     </div>
-                    <div className="h-5 border-r border-stone-300"></div>
+                    <div className="h-5 border-r border-stone-300" aria-hidden="true" />
                     <div className="font-medium text-stone-700">
                       {currentQuestionIndex + 1}/{questions.length}
                     </div>
@@ -317,34 +346,33 @@ const Quiz: React.FC = () => {
 
                 <div className="mb-6">
                   <h3 className="mb-4 text-xl font-medium text-stone-800">
-                    {questions[currentQuestionIndex].question}
+                    {currentQuestion.question}
                   </h3>
 
-                  {questions[currentQuestionIndex].code && (
+                  {currentQuestion.code && (
                     <div className="mb-5 rounded-lg overflow-hidden">
-                      <CodeBlock 
-                        code={questions[currentQuestionIndex].code}
+                      <CodeBlock
+                        code={currentQuestion.code}
                         language={topic === 'javascript' ? 'javascript' : topic === 'html' ? 'html' : topic}
                         showLineNumbers={true}
                       />
                     </div>
                   )}
 
-                  <div className="mb-4 space-y-3">
-                    {questions[currentQuestionIndex].options.map((option, i) => {
-                      // Determine button style based on selection state
-                      let buttonStyle = "bg-stone-50 hover:bg-stone-100 border border-stone-200";
-                      
+                  <div className="mb-4 space-y-3" role="radiogroup" aria-label="Answer options">
+                    {currentQuestion.options.map((option, i) => {
+                      let buttonStyle = 'bg-stone-50 hover:bg-stone-100 border border-stone-200';
+
                       if (selectedAnswer) {
-                        if (option === questions[currentQuestionIndex].correctAnswer) {
-                          buttonStyle = "bg-green-100 border border-green-300 text-green-800";
+                        if (option === currentQuestion.correctAnswer) {
+                          buttonStyle = 'bg-green-100 border border-green-300 text-green-800';
                         } else if (option === selectedAnswer) {
-                          buttonStyle = "bg-red-100 border border-red-300 text-red-800";
+                          buttonStyle = 'bg-red-100 border border-red-300 text-red-800';
                         } else {
-                          buttonStyle = "bg-stone-50 border border-stone-200 opacity-70";
+                          buttonStyle = 'bg-stone-50 border border-stone-200 opacity-70';
                         }
                       }
-                      
+
                       return (
                         <motion.button
                           key={i}
@@ -352,9 +380,11 @@ const Quiz: React.FC = () => {
                           whileTap={!selectedAnswer ? { scale: 0.99 } : {}}
                           onClick={() => !selectedAnswer && handleAnswerClick(option)}
                           disabled={!!selectedAnswer}
+                          role="radio"
+                          aria-checked={selectedAnswer === option}
                           className={`w-full p-3.5 text-left rounded-lg transition-all ${buttonStyle} flex items-center`}
                         >
-                          <span className="flex justify-center items-center mr-3 w-7 h-7 text-sm font-medium rounded-full bg-stone-200 text-stone-700">
+                          <span className="flex justify-center items-center mr-3 w-7 h-7 text-sm font-medium rounded-full bg-stone-200 text-stone-700" aria-hidden="true">
                             {String.fromCharCode(65 + i)}
                           </span>
                           {option}
@@ -365,7 +395,7 @@ const Quiz: React.FC = () => {
                 </div>
 
                 <AnimatePresence>
-                  {showExplanation && (
+                  {showExplanation && currentQuestion.explanation && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -373,10 +403,10 @@ const Quiz: React.FC = () => {
                       className="p-4 mb-4 bg-amber-50 rounded-lg border border-amber-200"
                     >
                       <h4 className="flex items-center mb-2 font-medium text-amber-800">
-                        <Lightbulb className="mr-2 text-amber-500" size={18} />
+                        <Lightbulb className="mr-2 text-amber-500" size={18} aria-hidden="true" />
                         Explanation
                       </h4>
-                      <p className="text-stone-700">{questions[currentQuestionIndex].explanation}</p>
+                      <p className="text-stone-700">{currentQuestion.explanation}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -391,9 +421,9 @@ const Quiz: React.FC = () => {
                     className="flex justify-center items-center py-3 w-full font-medium text-white bg-gradient-to-r from-teal-500 to-teal-600 rounded-lg shadow-md transition-all hover:from-teal-600 hover:to-teal-700"
                   >
                     {currentQuestionIndex < questions.length - 1 ? (
-                      <>Next Question <ChevronRight size={18} className="ml-1" /></>
+                      <>Next Question <ChevronRight size={18} className="ml-1" aria-hidden="true" /></>
                     ) : (
-                      <>Finish Quiz <Award size={18} className="ml-1" /></>
+                      <>Finish Quiz <Award size={18} className="ml-1" aria-hidden="true" /></>
                     )}
                   </motion.button>
                 )}
@@ -408,14 +438,45 @@ const Quiz: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4 }}
-              className="p-6 bg-white rounded-xl border shadow-md border-stone-100"
+              className="relative p-6 bg-white rounded-xl border shadow-md border-stone-100"
             >
+              {celebration && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10" aria-hidden="true">
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    className="text-6xl"
+                  >
+                    🎉
+                  </motion.div>
+                  {particles.map((p, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute w-2 h-2 rounded-full"
+                      style={{
+                        background: p.color,
+                        left: `${p.left}%`,
+                        top: `${p.top}%`,
+                      }}
+                      initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
+                      animate={{
+                        scale: [0, 1.5, 0],
+                        x: p.dx,
+                        y: p.dy,
+                        opacity: [1, 1, 0],
+                      }}
+                      transition={{ duration: 1.2, delay: i * 0.05 }}
+                    />
+                  ))}
+                </div>
+              )}
               <h2 className="flex items-center mb-6 text-2xl font-bold">
-                <BarChart2 className="mr-2 text-teal-500" /> Quiz Results
+                <BarChart2 className="mr-2 text-teal-500" aria-hidden="true" /> Quiz Results
               </h2>
-              
+
               <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-3">
-                <motion.div 
+                <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.2 }}
@@ -424,20 +485,20 @@ const Quiz: React.FC = () => {
                   <div className="mb-1 text-3xl font-bold text-teal-700">{score}/{questions.length}</div>
                   <div className="text-sm text-stone-600">Correct Answers</div>
                 </motion.div>
-                
-                <motion.div 
+
+                <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.3 }}
                   className="p-5 text-center bg-gradient-to-br from-amber-50 rounded-lg border border-amber-100 to-stone-50"
                 >
                   <div className="mb-1 text-3xl font-bold text-amber-700">
-                    {Math.round((score / questions.length) * 100)}%
+                    {questions.length > 0 ? Math.round((score / questions.length) * 100) : 0}%
                   </div>
                   <div className="text-sm text-stone-600">Score</div>
                 </motion.div>
-                
-                <motion.div 
+
+                <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.4 }}
@@ -447,13 +508,13 @@ const Quiz: React.FC = () => {
                   <div className="text-sm text-stone-600">Highest Streak</div>
                 </motion.div>
               </div>
-              
+
               <div className="mb-8">
                 <h3 className="flex items-center mb-4 text-lg font-medium">
-                  <Zap className="mr-2 text-yellow-500" size={18} />
+                  <Zap className="mr-2 text-yellow-500" size={18} aria-hidden="true" />
                   Performance Insights
                 </h3>
-                
+
                 <div className="p-4 rounded-lg border bg-stone-50 border-stone-200">
                   {score === questions.length ? (
                     <p className="text-green-700">
@@ -491,6 +552,4 @@ const Quiz: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default Quiz;
+}

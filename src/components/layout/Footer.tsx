@@ -1,159 +1,121 @@
-import React from 'react';
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from 'react-icons/fa';
+import { MessageCircle, Camera, Video } from 'lucide-react';
 
-interface SocialIcon {
-  Icon: React.ComponentType;
-  href: string;
-  label: string;
-}
-
-interface FooterLink {
+interface FooterLinkData {
   label: string;
   href: string;
 }
 
-interface FooterColumn {
+interface FooterColumnData {
   title: string;
-  links: FooterLink[];
+  links: FooterLinkData[];
 }
 
-interface MeteorProps {
-  size: number;
-  duration: number;
-  delay: number;
-}
-
-interface StarProps {
-  top: number;
-  left: number;
-  size: number;
-}
-
-interface FooterLinkProps {
-  href: string;
-  children: React.ReactNode;
-}
-
-const socialIcons: SocialIcon[] = [
-  { Icon: FaFacebookF, href: '#', label: 'Facebook' },
-  { Icon: FaTwitter, href: '#', label: 'Twitter' },
-  { Icon: FaInstagram, href: '#', label: 'Instagram' },
-  { Icon: FaYoutube, href: '#', label: 'YouTube' },
-];
-
-const footerLinks: FooterColumn[] = [
+const footerColumns: FooterColumnData[] = [
   {
     title: 'PathFinder',
     links: [
-      { label: 'About Us', href: '#' },
-      { label: 'Our Approach', href: '#' },
-      { label: 'Resources', href: '#' },
-      { label: 'Contact Us', href: '#' },
+      { label: 'About Us', href: '/about' },
+      { label: 'Our Approach', href: '/approach' },
+      { label: 'Resources', href: '/resources' },
+      { label: 'Contact Us', href: '/contact' },
     ],
   },
   {
     title: 'Explore',
     links: [
-      { label: 'Career Paths', href: '#' },
-      { label: 'Success Stories', href: '#' },
-      { label: 'Blog', href: '#' },
-      { label: 'Webinars', href: '#' },
+      { label: 'Career Paths', href: '/roadmap' },
+      { label: 'Success Stories', href: '/testimonials' },
+      { label: 'Blog', href: '/blog' },
+      { label: 'Webinars', href: '/webinars' },
     ],
   },
   {
     title: 'Support',
     links: [
-      { label: 'FAQs', href: '#' },
-      { label: 'Testimonials', href: '#' },
-      { label: 'Volunteer', href: '#' },
-      { label: 'Partnerships', href: '#' },
+      { label: 'FAQs', href: '/faq' },
+      { label: 'Testimonials', href: '/testimonials' },
+      { label: 'Volunteer', href: '/volunteer' },
+      { label: 'Partnerships', href: '/partnerships' },
     ],
   },
 ];
 
-const Meteor: React.FC<MeteorProps> = ({ size, duration, delay }) => (
-  <motion.div
-    className={`absolute bg-white rounded-full shadow-lg`}
-    style={{
-      width: size,
-      height: size,
-      boxShadow: `0 0 ${size * 2}px ${size / 2}px rgba(255,255,255,0.3)`,
-    }}
-    initial={{ top: '-5%', left: '105%' }}
-    animate={{
-      top: '105%',
-      left: '-5%',
-      transition: { duration, delay, repeat: Infinity, repeatDelay: 4 },
-    }}
-  />
-);
+const socialLinks = [
+  { Icon: MessageCircle, href: '/facebook', label: 'Facebook' },
+  { Icon: MessageCircle, href: '/twitter', label: 'Twitter' },
+  { Icon: Camera, href: '/instagram', label: 'Instagram' },
+  { Icon: Video, href: '/youtube', label: 'YouTube' },
+];
 
-const Star: React.FC<StarProps> = ({ top, left, size }) => (
-  <div
-    className="absolute bg-white rounded-full animate-pulse"
-    style={{
-      top: `${top}%`,
-      left: `${left}%`,
-      width: size,
-      height: size,
-      opacity: Math.random() * 0.8 + 0.2,
-    }}
-  />
-);
+export default function Footer() {
+  const currentYear = new Date().getFullYear();
 
-const FooterLink: React.FC<FooterLinkProps> = ({ href, children }) => (
-  <motion.a
-    href={href}
-    className="inline-block text-base transition-colors duration-300 hover:text-amber-300"
-    whileHover={{ scale: 1.02, x: 5 }}
-    whileTap={{ scale: 0.98 }}
-  >
-    {children}
-  </motion.a>
-);
+  const stars = useMemo(() => {
+    return Array.from({ length: 30 }, (_, i) => ({
+      id: i,
+      top: (i * 17 + 3) % 100,
+      left: (i * 41 + 7) % 100,
+      size: (i * 13) % 2 + 1,
+      opacity: ((i * 7) % 80 + 20) / 100,
+    }));
+  }, []);
 
-const Footer: React.FC = () => {
   return (
     <footer className="relative py-16 sm:py-20 overflow-hidden text-white bg-gradient-to-br from-teal-800 to-teal-900">
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(30)].map((_, i) => (
-          <Star key={i} top={Math.random() * 100} left={Math.random() * 100} size={Math.random() * 2 + 1} />
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+        {stars.map((star) => (
+          <div
+            key={star.id}
+            className="absolute bg-white rounded-full animate-pulse"
+            style={{
+              top: `${star.top}%`,
+              left: `${star.left}%`,
+              width: star.size,
+              height: star.size,
+              opacity: star.opacity,
+            }}
+          />
         ))}
       </div>
-      <Meteor size={2} duration={3} delay={0} />
-      <Meteor size={1.5} duration={2.5} delay={1.5} />
-      <Meteor size={2.5} duration={3.5} delay={3} />
-      
+
       <div className="relative z-10 px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="grid gap-8 mb-12 sm:gap-12 sm:grid-cols-2 lg:grid-cols-4">
-          {footerLinks.map((column, index) => (
-            <motion.div 
-              key={index} 
+          {footerColumns.map((column, index) => (
+            <motion.div
+              key={column.title}
               className="space-y-4 sm:space-y-6"
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
             >
               <h3 className="text-xl sm:text-2xl font-medium text-amber-400">{column.title}</h3>
               <ul className="space-y-2 sm:space-y-3">
-                {column.links.map((link, linkIndex) => (
-                  <li key={linkIndex}>
-                    <FooterLink href={link.href}>{link.label}</FooterLink>
+                {column.links.map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      className="inline-block text-base transition-colors duration-300 hover:text-amber-300"
+                    >
+                      {link.label}
+                    </a>
                   </li>
                 ))}
               </ul>
             </motion.div>
           ))}
-          <motion.div 
+          <motion.div
             className="space-y-4 sm:space-y-6"
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ delay: 0.3 }}
           >
             <h3 className="text-xl sm:text-2xl font-medium text-amber-400">Connect</h3>
             <div className="flex flex-wrap gap-3 sm:gap-4">
-              {socialIcons.map(({ Icon, href, label }) => (
+              {socialLinks.map(({ Icon, href, label }) => (
                 <motion.a
                   key={label}
                   href={href}
@@ -162,21 +124,22 @@ const Footer: React.FC = () => {
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  <Icon />
+                  <Icon size={20} />
                 </motion.a>
               ))}
             </div>
           </motion.div>
         </div>
-        
+
         <motion.div
           className="pt-6 sm:pt-8 text-center border-t border-teal-700"
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ delay: 0.5 }}
         >
           <p className="text-base sm:text-lg text-teal-200">
-            &copy; 2024{' '}
+            &copy; {currentYear}{' '}
             <span className="text-amber-400 font-medium">PathFinder</span>
             . All rights reserved.
           </p>
@@ -184,6 +147,4 @@ const Footer: React.FC = () => {
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}

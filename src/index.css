@@ -1,1 +1,49 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Montserrat", "Inter", "sans-serif";
+  --color-proj-start: #0d9488;
+  --color-proj-end: #06b6d4;
+}
+
+@layer base {
+  html {
+    @apply antialiased;
+  }
+}
+
+@layer utilities {
+  .bg-proj {
+    background-image: linear-gradient(to right, #0d9488, #06b6d4);
+  }
+  .bg-proj-hover {
+    background-image: linear-gradient(to right, #0a6f6f, #0ea5e5);
+  }
+}
+
+/* Scroll animations for HeroSection */
+@keyframes scroll-up {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+@keyframes scroll-down {
+  0% { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+
+.animate-scroll-up {
+  animation: scroll-up 30s linear infinite;
+}
+
+.animate-scroll-down {
+  animation: scroll-down 30s linear infinite;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll-up,
+  .animate-scroll-down {
+    animation: none;
+  }
+}

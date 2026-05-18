@@ -1,40 +1,44 @@
-import React from 'react';
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
-import Navbar from './components/layout/Navbar';
-import Footer from './components/layout/Footer';
-import ErrorFallback from './components/shared/ErrorFallback';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import ErrorFallback from '@/components/shared/ErrorFallback';
 
-// Direct imports instead of lazy loading
-import Home from './pages/Home';
-import Progress from './pages/Progress';
-import Quiz from './pages/Quiz';
-import Resume from './pages/Resume';
-import Roadmap from './pages/Roadmap';
+const Home = lazy(() => import('@/pages/Home'));
+const Progress = lazy(() => import('@/pages/Progress'));
+const Quiz = lazy(() => import('@/pages/Quiz'));
+const Resume = lazy(() => import('@/pages/Resume'));
+const Roadmap = lazy(() => import('@/pages/Roadmap'));
 
-const App: React.FC = () => {
+const LoadingPage = () => (
+  <div className="flex flex-col justify-center items-center min-h-screen bg-stone-50">
+    <div className="w-10 h-10 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin" />
+    <p className="mt-4 text-sm text-stone-600">Loading...</p>
+  </div>
+);
+
+export default function App() {
   return (
     <Router>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <div className="flex flex-col min-h-screen App">
+        <div className="flex flex-col min-h-screen">
           <Navbar />
           <main className="flex-grow">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/progress" element={<Progress />} />
-              <Route path="/quiz" element={<Quiz />} />
-              <Route path="/resume" element={<Resume />} />
-              <Route path="/roadmap" element={<Roadmap />} />
-
-              {/* Catch-all route for 404 */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <Suspense fallback={<LoadingPage />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/progress" element={<Progress />} />
+                <Route path="/quiz" element={<Quiz />} />
+                <Route path="/resume" element={<Resume />} />
+                <Route path="/roadmap" element={<Roadmap />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
           </main>
           <Footer />
         </div>
       </ErrorBoundary>
     </Router>
   );
-};
-
-export default App;
+}

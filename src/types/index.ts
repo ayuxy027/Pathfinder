@@ -1,5 +1,3 @@
-// Common interfaces and types for the application
-
 export interface User {
   id: string;
   name: string;
@@ -11,10 +9,11 @@ export interface QuizQuestion {
   id: string;
   question: string;
   options: string[];
-  correctAnswer: number;
+  correctAnswer: string;
   explanation?: string;
   difficulty?: 'easy' | 'medium' | 'hard';
   category?: string;
+  code?: string | null;
 }
 
 export interface QuizResult {
@@ -23,12 +22,12 @@ export interface QuizResult {
   totalQuestions: number;
   timeSpent: number;
   answers: UserAnswer[];
-  completedAt: Date;
+  completedAt: string;
 }
 
 export interface UserAnswer {
   questionId: string;
-  selectedAnswer: number;
+  selectedAnswer: string;
   isCorrect: boolean;
   timeSpent: number;
 }
@@ -67,101 +66,33 @@ export interface Badge {
   name: string;
   description: string;
   icon: string;
-  unlockedAt: Date;
+  unlockedAt: string;
 }
 
 export interface ChatMessage {
   id: string;
   content: string;
   role: 'user' | 'assistant';
-  timestamp: Date;
+  timestamp: string;
 }
 
-export interface ResumeData {
-  personalInfo: PersonalInfo;
-  experience: Experience[];
-  education: Education[];
-  skills: Skill[];
-  projects: Project[];
-}
+export type ApiResponse<T> =
+  | { success: true; data: T; message?: string }
+  | { success: false; error: string; message?: string };
 
-export interface PersonalInfo {
-  fullName: string;
-  email: string;
-  phone: string;
-  location: string;
-  summary: string;
-  linkedIn?: string;
-  github?: string;
-  portfolio?: string;
-}
-
-export interface Experience {
-  id: string;
-  company: string;
-  position: string;
-  startDate: string;
-  endDate?: string;
-  current: boolean;
-  description: string[];
-  technologies?: string[];
-}
-
-export interface Education {
-  id: string;
-  institution: string;
-  degree: string;
-  field: string;
-  startDate: string;
-  endDate?: string;
-  gpa?: string;
-  relevant_coursework?: string[];
-}
-
-export interface Skill {
-  name: string;
-  level: 'beginner' | 'intermediate' | 'advanced' | 'expert';
-  category: string;
-}
-
-export interface Project {
-  id: string;
-  name: string;
-  description: string;
-  technologies: string[];
-  startDate: string;
-  endDate?: string;
-  github?: string;
-  demo?: string;
-  highlights: string[];
-}
-
-// API response types
-export interface ApiResponse<T> {
-  data: T;
-  success: boolean;
-  message?: string;
-  error?: string;
-}
-
-// Component prop types
-export interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary';
   size?: 'sm' | 'md' | 'lg';
-  disabled?: boolean;
   loading?: boolean;
-  onClick?: () => void;
-  children: React.ReactNode;
-  className?: string;
 }
 
 export interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
-  color?: string;
+  color?: 'blue' | 'teal' | 'red' | 'amber';
   text?: string;
 }
 
 export interface ErrorFallbackProps {
-  error: Error;
+  error: unknown;
   resetErrorBoundary: () => void;
-} 
+}

@@ -1,36 +1,41 @@
-import React from 'react';
-import { FaChalkboardTeacher, FaBriefcase, FaUserGraduate, FaChartLine } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import { GraduationCap, TrendingUp, Users, Briefcase } from 'lucide-react';
 
-const FeatureSection = () => {
+interface Feature {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+}
+
+const features: Feature[] = [
+  {
+    icon: GraduationCap,
+    title: "Personalized Career Assessment",
+    description: "Receive tailored career suggestions based on your skills, interests, and personality traits."
+  },
+  {
+    icon: TrendingUp,
+    title: "Job Market Insights",
+    description: "Access real-time job market trends and insights to make informed career decisions."
+  },
+  {
+    icon: Users,
+    title: "Expert Guidance",
+    description: "Connect with career experts for advice and mentorship in your desired field."
+  },
+  {
+    icon: Briefcase,
+    title: "Resume and Interview Preparation",
+    description: "Get assistance in crafting an impressive resume and preparing for job interviews effectively."
+  }
+];
+
+export default function FeatureSection() {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
   });
-
-  const features = [
-    {
-      icon: FaUserGraduate,
-      title: "Personalized Career Assessment",
-      description: "Receive tailored career suggestions based on your skills, interests, and personality traits."
-    },
-    {
-      icon: FaChartLine,
-      title: "Job Market Insights",
-      description: "Access real-time job market trends and insights to make informed career decisions."
-    },
-    {
-      icon: FaChalkboardTeacher,
-      title: "Expert Guidance",
-      description: "Connect with career experts for advice and mentorship in your desired field."
-    },
-    {
-      icon: FaBriefcase,
-      title: "Resume and Interview Preparation",
-      description: "Get assistance in crafting an impressive resume and preparing for job interviews effectively."
-    }
-  ];
 
   return (
     <section ref={ref} className="py-16 bg-gradient-to-br from-white to-teal-50 sm:py-20 lg:py-24">
@@ -53,28 +58,36 @@ const FeatureSection = () => {
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 sm:gap-8">
           {features.map((feature, index) => (
-            <FeatureCard key={index} feature={feature} index={index} />
+            <FeatureCard key={feature.title} feature={feature} index={index} inView={inView} />
           ))}
         </div>
       </div>
     </section>
   );
-};
+}
 
-const FeatureCard = ({ feature, index }) => {
+interface FeatureCardProps {
+  feature: Feature;
+  index: number;
+  inView: boolean;
+}
+
+function FeatureCard({ feature, index, inView }: FeatureCardProps) {
+  const Icon = feature.icon;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.8, delay: index * 0.1 }}
       className="overflow-hidden relative p-6 bg-white rounded-xl shadow-lg transition-all duration-300 sm:p-8 hover:shadow-xl group"
     >
-      <div className="absolute top-0 right-0 w-24 h-24 bg-teal-100 rounded-full opacity-50 transform translate-x-8 -translate-y-8"></div>
+      <div className="absolute top-0 right-0 w-24 h-24 bg-teal-100 rounded-full opacity-50 transform translate-x-8 -translate-y-8" aria-hidden="true" />
       <motion.div
         whileHover={{ scale: 1.05, rotate: 5 }}
         className="flex relative z-10 justify-center items-center mb-6 w-16 h-16 text-white bg-teal-600 rounded-xl transition-colors duration-300 group-hover:bg-teal-700"
       >
-        <feature.icon className="text-2xl" />
+        <Icon className="w-8 h-8" aria-hidden="true" />
       </motion.div>
       <h3 className="mb-3 text-xl font-medium text-gray-800">{feature.title}</h3>
       <p className="text-sm leading-relaxed text-gray-600">{feature.description}</p>
@@ -82,9 +95,8 @@ const FeatureCard = ({ feature, index }) => {
         className="absolute right-0 bottom-0 w-20 h-20 bg-teal-100 rounded-full opacity-30 transform translate-x-6 translate-y-6"
         animate={{ scale: [1, 1.1, 1] }}
         transition={{ duration: 5, repeat: Infinity }}
-      ></motion.div>
+        aria-hidden="true"
+      />
     </motion.div>
   );
-};
-
-export default FeatureSection;
+}
